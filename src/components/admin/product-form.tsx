@@ -22,6 +22,30 @@ export default function ProductForm({
 }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagesText, setImagesText] = useState(initial?.images || "");
+
+  async function handleUploadImage(file: File | null) {
+    if (!file) return;
+    setUploading(true);
+    setMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch("/api/admin/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha no upload da imagem.");
+      setImagesText((prev) => (prev ? `${prev}\n${data.url}` : data.url));
+      setMessage("Imagem enviada e adicionada ao produto.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Erro ao enviar imagem.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function onSubmit(formData: FormData) {
     setLoading(true);
@@ -34,7 +58,7 @@ export default function ProductForm({
       stock: Number(formData.get("stock") || 0),
       featured: formData.get("featured") === "on",
       active: formData.get("active") === "on",
-      images: String(formData.get("images") || ""),
+      images: imagesText,
     };
     const res = await fetch(endpoint, {
       method: "POST",
@@ -67,16 +91,30 @@ export default function ProductForm({
         className="textarea"
         rows={3}
         placeholder="URLs de imagens (uma por linha)"
-        defaultValue={initial?.images}
+        value={imagesText}
+        onChange={(e) => setImagesText(e.target.value)}
       />
+      <div>
+        <label className="block text-sm font-medium">Upload de JPG/PNG</label>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="input mt-2"
+          disabled={uploading}
+          onChange={(e) => handleUploadImage(e.target.files?.[0] || null)}
+        />
+        <p className="mt-1 text-xs text-neutral-600">
+          O upload gera uma URL local e adiciona automaticamente na lista acima.
+        </p>
+      </div>
       <label className="block text-sm">
         <input type="checkbox" name="featured" defaultChecked={initial?.featured} /> Destaque
       </label>
       <label className="block text-sm">
         <input type="checkbox" name="active" defaultChecked={initial?.active ?? true} /> Ativo
       </label>
-      <button className="btn btn-primary" disabled={loading}>
-        {loading ? "Salvando..." : "Salvar produto"}
+      <button className="btn btn-primary" disabled={loading || uploading}>
+        {loading ? "Salvando..." : uploading ? "Enviando imagem..." : "Salvar produto"}
       </button>
       {message && <p className="text-sm">{message}</p>}
     </form>
