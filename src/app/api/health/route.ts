@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
-import { databaseUrlDiagnostics, getAppDatabaseUrl } from "@/lib/database-url";
-import { prismaErrorMessage } from "@/lib/db-errors";
+import {
+  databaseUrlDiagnostics,
+  getAppDatabaseUrl,
+  usesNeonDatabase,
+} from "@/lib/database-url";
+import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function GET() {
   const appUrl = getAppDatabaseUrl();
@@ -17,11 +22,12 @@ export async function GET() {
   }
 
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await assertDatabase(usesNeonDatabase() ? 5 : 3);
     const productCount = await prisma.product.count();
     return NextResponse.json({
       ok: true,
       database: "connected",
+      driver: usesNeonDatabase() ? "neon-serverless" : "postgres-tcp",
       productCount,
       hints: databaseUrlDiagnostics(),
     });
@@ -30,6 +36,7 @@ export async function GET() {
       {
         ok: false,
         database: "error",
+        driver: usesNeonDatabase() ? "neon-serverless" : "postgres-tcp",
         message: prismaErrorMessage(error),
         hints: databaseUrlDiagnostics(),
       },

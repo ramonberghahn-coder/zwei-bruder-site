@@ -1,10 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import { getAppDatabaseUrl } from "./database-url";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import ws from "ws";
+import { neonConfig } from "@neondatabase/serverless";
+import { getAppDatabaseUrl, usesNeonDatabase } from "./database-url";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-function createPrismaClient() {
+function createPrismaClient(): PrismaClient {
   const url = getAppDatabaseUrl();
+
+  if (url && usesNeonDatabase()) {
+    neonConfig.webSocketConstructor = ws;
+    const adapter = new PrismaNeon({ connectionString: url });
+    return new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  }
+
   return new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
     ...(url ? { datasources: { db: { url } } } : {}),

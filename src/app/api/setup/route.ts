@@ -5,6 +5,7 @@ import {
   getMigrateDatabaseUrl,
 } from "@/lib/database-url";
 import { prismaErrorMessage } from "@/lib/db-errors";
+import { runSeed } from "@/lib/run-seed";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -50,19 +51,29 @@ export async function GET(req: Request) {
       env: pushEnv,
       encoding: "utf-8",
     });
-    execSync("node prisma/seed.mjs", {
-      stdio: "pipe",
-      env: pushEnv,
-      encoding: "utf-8",
-    });
-    return NextResponse.json({
-      ok: true,
-      message: "Banco criado e dados iniciais carregados com sucesso.",
-    });
   } catch (error) {
     return NextResponse.json(
       {
         error: commandErrorMessage(error),
+        step: "db_push",
+        hints: databaseUrlDiagnostics(),
+      },
+      { status: 500 }
+    );
+  }
+
+  try {
+    await runSeed();
+    return NextResponse.json({
+      ok: true,
+      message: "Banco criado e dados iniciais carregados com sucesso.",
+      hints: databaseUrlDiagnostics(),
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: prismaErrorMessage(error),
+        step: "seed",
         hints: databaseUrlDiagnostics(),
       },
       { status: 500 }

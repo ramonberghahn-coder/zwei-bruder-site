@@ -1,70 +1,115 @@
+export function sanitizeEnvUrl(raw: string): string {
+  let url = raw.trim();
+  if (
+    (url.startsWith('"') && url.endsWith('"')) ||
+    (url.startsWith("'") && url.endsWith("'"))
+  ) {
+    url = url.slice(1, -1).trim();
+  }
+  return url;
+}
+
 /**
  * Normaliza a URL do Postgres (Neon + Render).
- * - sslmode=require (obrigatório na Neon)
- * - connect_timeout para acordar projeto suspenso
  */
 export function normalizeDatabaseUrl(raw: string): string {
-  const url = raw.trim();
+  const url = sanitizeEnvUrl(raw);
   if (!url) return url;
 
   const isNeon = url.includes("neon.tech");
   const isPostgres = url.startsWith("postgres://") || url.startsWith("postgresql://");
   if (!isPostgres) return url;
 
-  const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
-  if (isNeon && !parsed.searchParams.has("sslmode")) {
-    parsed.searchParams.set("sslmode", "require");
+  try {
+    const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
+    if (isNeon && !parsed.searchParams.has("sslmode")) {
+      parsed.searchParams.set("sslmode", "require");
+    }
+    if (!parsed.searchParams.has("connect_timeout")) {
+      parsed.searchParams.set("connect_timeout", "30");
+    }
+    return parsed.toString();
+  } catch {
+    const sep = url.includes("?") ? "&" : "?";
+    if (!url.includes("sslmode=")) {
+      return `${url}${sep}sslmode=require&connect_timeout=30`;
+    }
+    return url;
   }
-  if (!parsed.searchParams.has("connect_timeout")) {
-    parsed.searchParams.set("connect_timeout", "15");
-  }
-
-  return parsed.toString();
 }
 
-/** URL para queries da aplicação (pode ser pooler). */
 export function getAppDatabaseUrl(): string | undefined {
-  const raw = process.env.DATABASE_URL?.trim();
-  if (!raw) return undefined;
-  return normalizeDatabaseUrl(raw);
-}
-
-/** URL para migrations / db push (preferir Direct, sem -pooler). */
-export function getMigrateDatabaseUrl(): string | undefined {
-  const direct = process.env.DIRECT_DATABASE_URL?.trim();
-  const pooled = process.env.DATABASE_URL?.trim();
+  const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
+  const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
   const raw = direct || pooled;
   if (!raw) return undefined;
   return normalizeDatabaseUrl(raw);
 }
 
+export function getMigrateDatabaseUrl(): string | undefined {
+  const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
+  const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
+  const raw = direct || pooled;
+  if (!raw) return undefined;
+  return normalizeDatabaseUrl(raw);
+}
+
+export function parseDatabaseHost(url: string): string | null {
+  try {
+    const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
+    return parsed.hostname || null;
+  } catch {
+    return null;
+  }
+}
+
 export function databaseUrlDiagnostics(): string[] {
   const hints: string[] = [];
-  const url = process.env.DATABASE_URL?.trim() ?? "";
+  const url = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
+  const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
+  const effective = direct || url;
 
-  if (!url) {
+  if (!url && !direct) {
     hints.push("DATABASE_URL não está definida na Render.");
     return hints;
   }
 
-  if (!url.startsWith("postgres://") && !url.startsWith("postgresql://")) {
-    hints.push("DATABASE_URL deve começar com postgresql:// (não use file: ou sqlite).");
+  const host = effective ? parseDatabaseHost(normalizeDatabaseUrl(effective)) : null;
+  if (host) {
+    hints.push(`Host detectado: ${host}`);
+    if (host.includes("-pooler")) {
+      hints.push("Use também DIRECT_DATABASE_URL com o host Direct (sem -pooler) para /api/setup.");
+    }
   }
 
-  if (url.includes("neon.tech") && url.includes("-pooler")) {
-    hints.push(
-      "Para /api/setup use a connection string Direct do Neon (host sem -pooler). " +
-        "Defina DIRECT_DATABASE_URL com a URL Direct ou troque DATABASE_URL."
-    );
+  if (
+    effective &&
+    !effective.startsWith("postgres://") &&
+    !effective.startsWith("postgresql://")
+  ) {
+    hints.push("A URL deve começar com postgresql://");
   }
 
-  if (url.includes("localhost") || url.includes("127.0.0.1")) {
-    hints.push("DATABASE_URL aponta para localhost — use a URL do painel Neon na Render.");
+  if (effective.includes("localhost") || effective.includes("127.0.0.1")) {
+    hints.push("A URL aponta para localhost — cole a connection string do painel Neon.");
   }
 
-  if (!url.includes("sslmode=") && url.includes("neon.tech")) {
-    hints.push("Adicione ?sslmode=require ao final da URL (ou salve de novo após o deploy).");
+  if (effective.includes("neon.tech")) {
+    hints.push("No Neon: abra o projeto no console para acordar o banco (free tier).");
+    hints.push("No Neon → Settings: desative restrição de IP se estiver ativa.");
+    if (!effective.includes("sslmode=")) {
+      hints.push("Inclua ?sslmode=require na URL.");
+    }
+  }
+
+  if (!direct && url.includes("neon.tech")) {
+    hints.push("Recomendado: defina DIRECT_DATABASE_URL com a URL Direct do Neon.");
   }
 
   return hints;
+}
+
+export function usesNeonDatabase(): boolean {
+  const url = getAppDatabaseUrl() ?? "";
+  return url.includes("neon.tech");
 }
