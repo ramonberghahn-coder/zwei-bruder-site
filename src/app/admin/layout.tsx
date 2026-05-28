@@ -1,13 +1,21 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getSessionSafe } from "@/lib/session";
 import AdminLogoutButton from "@/components/admin/logout-button";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = (await headers()).get("x-pathname") || "";
+  const isLoginPage = pathname.startsWith("/admin/login");
   const session = await getSessionSafe();
+
+  if (!isLoginPage && !session.isAdmin) {
+    redirect(`/admin/login?next=${encodeURIComponent(pathname)}`);
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      {session.isAdmin ? (
+      {session.isAdmin && !isLoginPage ? (
         <header className="border-b border-neutral-200">
           <div className="container flex h-14 items-center justify-between">
             <nav className="flex items-center gap-5 text-sm text-neutral-600">

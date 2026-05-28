@@ -17,9 +17,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
   }
 
-  const session = await getSession();
-  session.isAdmin = true;
-  await session.save();
-
-  return NextResponse.json({ ok: true });
+  try {
+    const session = await getSession();
+    session.isAdmin = true;
+    await session.save();
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Erro ao iniciar sessão. Verifique SESSION_SECRET na Render (32+ caracteres).",
+      },
+      { status: 500 }
+    );
+  }
 }

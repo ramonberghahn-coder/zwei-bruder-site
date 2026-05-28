@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
-import { buildPixPayload } from "@/lib/pix";
+import { buildPixPayload, generatePixQrDataUrl } from "@/lib/pix";
 import { generateOrderNumber } from "@/lib/utils";
 
 const reserveSchema = z.object({
@@ -73,7 +73,14 @@ export async function POST(req: Request) {
       });
     });
 
-    return NextResponse.json({ orderNumber: order.orderNumber });
+    const qrDataUrl = await generatePixQrDataUrl(pixPayload);
+
+    return NextResponse.json({
+      orderNumber: order.orderNumber,
+      pixPayload,
+      qrDataUrl,
+      total: subtotal,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Erro ao reservar pedido" },

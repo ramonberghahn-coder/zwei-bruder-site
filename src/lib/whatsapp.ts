@@ -26,7 +26,7 @@ export function buildWhatsAppMessage(params: WhatsAppOrderParams): string {
     "",
     `*Total:* ${formatCurrency(params.total)}`,
     "",
-    "Pagamento via PIX realizado. Comprovante em anexo / link abaixo.",
+    "Pagamento via PIX. Comprovante no link abaixo (anexe na conversa se necessário).",
   ];
 
   if (params.paymentProofUrl) {

@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { getSessionSafe } from "./session";
+import { getSession } from "./session";
 
 export async function requireAdminApi() {
-  const session = await getSessionSafe();
+  let session;
+  try {
+    session = await getSession();
+  } catch {
+    return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
+  }
   if (!session.isAdmin) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
