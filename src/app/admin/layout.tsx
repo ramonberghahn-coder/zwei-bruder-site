@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getSession } from "@/lib/session";
+import { getSessionSafe } from "@/lib/session";
 import AdminLogoutButton from "@/components/admin/logout-button";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession();
+  const session = await getSessionSafe();
 
   return (
     <div className="min-h-screen bg-white">

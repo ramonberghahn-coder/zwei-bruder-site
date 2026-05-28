@@ -9,11 +9,18 @@ import Footer from "@/components/store/footer";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings();
-  return {
-    title: `${settings.storeName} | ${settings.storeTagline}`,
-    description: settings.aboutText || settings.storeTagline,
-  };
+  try {
+    const settings = await getSettings();
+    return {
+      title: `${settings.storeName} | ${settings.storeTagline}`,
+      description: settings.aboutText || settings.storeTagline,
+    };
+  } catch {
+    return {
+      title: "Zwei Brüder",
+      description: "Facas e acessórios em couro",
+    };
+  }
 }
 
 export default async function RootLayout({
