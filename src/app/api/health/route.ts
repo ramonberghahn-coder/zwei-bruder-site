@@ -1,35 +1,38 @@
 import { NextResponse } from "next/server";
+import { databaseUrlDiagnostics, getAppDatabaseUrl } from "@/lib/database-url";
+import { prismaErrorMessage } from "@/lib/db-errors";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const hasDb = Boolean(process.env.DATABASE_URL?.trim());
+  const appUrl = getAppDatabaseUrl();
 
-  if (!hasDb) {
+  if (!appUrl) {
     return NextResponse.json({
       ok: false,
       database: "missing DATABASE_URL",
+      hints: databaseUrlDiagnostics(),
     });
   }
 
   try {
-    await Promise.race([
-      prisma.$queryRaw`SELECT 1`,
-      new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("timeout")), 8_000);
-      }),
-    ]);
+    await prisma.$queryRaw`SELECT 1`;
     const productCount = await prisma.product.count();
     return NextResponse.json({
       ok: true,
       database: "connected",
       productCount,
+      hints: databaseUrlDiagnostics(),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "unknown error";
     return NextResponse.json(
-      { ok: false, database: "error", message },
+      {
+        ok: false,
+        database: "error",
+        message: prismaErrorMessage(error),
+        hints: databaseUrlDiagnostics(),
+      },
       { status: 503 }
     );
   }
