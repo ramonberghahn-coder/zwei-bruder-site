@@ -71,7 +71,7 @@ export default function ProductForm({
   }
 
   return (
-    <form action={onSubmit} className="card mt-6 space-y-4 p-5">
+    <form action={onSubmit} className="card mt-8 space-y-4 p-6">
       <input name="name" className="input" placeholder="Nome" defaultValue={initial?.name} required />
       <textarea
         name="description"
@@ -107,16 +107,16 @@ export default function ProductForm({
           O upload gera uma URL local e adiciona automaticamente na lista acima.
         </p>
       </div>
-      <label className="block text-sm">
+      <label className="block text-sm text-neutral-700">
         <input type="checkbox" name="featured" defaultChecked={initial?.featured} /> Destaque
       </label>
-      <label className="block text-sm">
+      <label className="block text-sm text-neutral-700">
         <input type="checkbox" name="active" defaultChecked={initial?.active ?? true} /> Ativo
       </label>
       <button className="btn btn-primary" disabled={loading || uploading}>
         {loading ? "Salvando..." : uploading ? "Enviando imagem..." : "Salvar produto"}
       </button>
-      {message && <p className="text-sm">{message}</p>}
+      {message && <p className="text-sm text-neutral-700">{message}</p>}
     </form>
   );
 }

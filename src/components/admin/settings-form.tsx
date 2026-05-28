@@ -21,7 +21,7 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
   }
 
   return (
-    <form action={onSubmit} className="card mt-6 space-y-4 p-5">
+    <form action={onSubmit} className="card mt-8 space-y-4 p-6">
       <input className="input" name="storeName" defaultValue={initial.storeName} placeholder="Nome da marca" />
       <input className="input" name="storeTagline" defaultValue={initial.storeTagline} placeholder="Slogan" />
       <input className="input" name="whatsappNumber" defaultValue={initial.whatsappNumber} placeholder="WhatsApp da empresa" />
@@ -30,8 +30,10 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
       <input className="input" name="pixMerchantName" defaultValue={initial.pixMerchantName} placeholder="Nome recebedor PIX" />
       <input className="input" name="pixMerchantCity" defaultValue={initial.pixMerchantCity} placeholder="Cidade PIX" />
       <textarea className="textarea" rows={4} name="aboutText" defaultValue={initial.aboutText} placeholder="Sobre a marca" />
-      <button className="btn btn-primary" disabled={saving}>{saving ? "Salvando..." : "Salvar configurações"}</button>
-      {message && <p className="text-sm">{message}</p>}
+      <button className="btn btn-primary" disabled={saving}>
+        {saving ? "Salvando..." : "Salvar configurações"}
+      </button>
+      {message && <p className="text-sm text-neutral-700">{message}</p>}
     </form>
   );
 }

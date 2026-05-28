@@ -39,8 +39,9 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
 
   return (
     <div className="mt-8 grid gap-6 md:grid-cols-2">
-      <section className="card p-5">
-        <h2 className="text-xl font-semibold">1) Pague no PIX</h2>
+      <section className="card p-6">
+        <p className="subtitle">Passo 1</p>
+        <h2 className="text-3xl font-semibold">Pague no PIX</h2>
         {qrDataUrl ? (
           <div className="mt-4">
             <Image src={qrDataUrl} alt="QR Code PIX" width={280} height={280} />
@@ -50,8 +51,9 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
         <textarea className="textarea mt-2" rows={4} readOnly value={pixPayload} />
       </section>
 
-      <section className="card p-5">
-        <h2 className="text-xl font-semibold">2) Envie comprovante e abra WhatsApp</h2>
+      <section className="card p-6">
+        <p className="subtitle">Passo 2</p>
+        <h2 className="text-3xl font-semibold">Envie comprovante e abra WhatsApp</h2>
         <input
           type="file"
           accept="image/*,.pdf"

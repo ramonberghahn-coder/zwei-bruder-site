@@ -6,16 +6,19 @@ export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
-    <div className="container py-10">
+    <div className="container py-12">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Produtos</h1>
+        <div>
+          <p className="subtitle">Catálogo</p>
+          <h1 className="mt-2 text-5xl font-semibold">Produtos</h1>
+        </div>
         <Link className="btn btn-primary" href="/admin/produtos/novo">
           Novo produto
         </Link>
       </div>
-      <div className="mt-6 overflow-auto rounded-xl border">
+      <div className="mt-8 overflow-auto rounded-xl border bg-white">
         <table className="min-w-full text-sm">
-          <thead className="bg-neutral-50 text-left">
+          <thead className="bg-neutral-50 text-left uppercase tracking-wider text-neutral-600">
             <tr>
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">Preço</th>

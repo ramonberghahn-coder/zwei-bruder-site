@@ -41,9 +41,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container grid gap-8 py-10 md:grid-cols-[1.2fr_0.8fr]">
-      <form action={reserveOrder} className="card space-y-4 p-5">
-        <h1 className="text-2xl font-semibold">Reserva e pagamento</h1>
+    <div className="container grid gap-8 py-12 md:grid-cols-[1.15fr_0.85fr]">
+      <form action={reserveOrder} className="card space-y-4 p-6">
+        <p className="subtitle">Checkout</p>
+        <h1 className="text-4xl font-semibold">Reserva e pagamento</h1>
         <input name="customerName" placeholder="Nome completo" className="input" required />
         <input name="customerPhone" placeholder="WhatsApp (com DDD)" className="input" required />
         <input name="customerEmail" placeholder="Email" className="input" />
@@ -57,8 +58,8 @@ export default function CheckoutPage() {
         </button>
       </form>
 
-      <aside className="card h-fit p-5">
-        <h2 className="text-lg font-semibold">Resumo</h2>
+      <aside className="card h-fit p-6">
+        <h2 className="text-2xl font-semibold">Resumo do pedido</h2>
         <div className="mt-4 space-y-3">
           {items.map((item) => (
             <div key={item.productId} className="flex items-center justify-between text-sm">
@@ -66,9 +67,13 @@ export default function CheckoutPage() {
               <span>{formatCurrency(item.quantity * item.price)}</span>
             </div>
           ))}
+          {items.length === 0 && <p className="text-sm text-neutral-500">Seu carrinho está vazio.</p>}
         </div>
-        <div className="mt-4 border-t pt-4">
-          <p className="font-semibold">Total: {formatCurrency(total)}</p>
+        <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+          <p className="text-lg font-semibold">Total: {formatCurrency(total)}</p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Após reservar, você receberá o PIX com QR Code e envio via WhatsApp.
+          </p>
         </div>
       </aside>
     </div>

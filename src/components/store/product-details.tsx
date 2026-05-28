@@ -23,17 +23,20 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const image = product.images[0] || "https://picsum.photos/800/600";
 
   return (
-    <div className="container grid gap-8 py-10 md:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
+    <div className="container grid gap-10 py-12 md:grid-cols-[1fr_0.9fr]">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-100">
         <Image src={image} alt={product.name} fill className="object-cover" />
       </div>
-      <div>
-        <h1 className="text-3xl font-semibold">{product.name}</h1>
-        <p className="mt-3 text-neutral-600">{product.description}</p>
-        <p className="mt-4 text-2xl font-semibold">{formatCurrency(product.price)}</p>
-        <p className="mt-1 text-sm text-neutral-500">Estoque: {product.stock}</p>
+      <div className="card h-fit p-7">
+        <p className="subtitle">Produto</p>
+        <h1 className="mt-3 text-5xl font-semibold leading-none">{product.name}</h1>
+        <p className="mt-4 text-neutral-700">{product.description}</p>
+        <p className="mt-6 text-3xl font-semibold">{formatCurrency(product.price)}</p>
+        <p className="mt-1 text-sm text-neutral-500">
+          {product.stock > 0 ? `Estoque disponível: ${product.stock}` : "Sem estoque no momento"}
+        </p>
 
-        <div className="mt-5 flex items-center gap-3">
+        <div className="mt-6 flex items-center gap-3">
           <input
             type="number"
             min={1}
@@ -57,8 +60,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               })
             }
           >
-            Adicionar ao carrinho
+            {product.stock > 0 ? "Adicionar ao carrinho" : "Indisponível"}
           </button>
+        </div>
+        <div className="mt-6 border-t pt-5 text-sm text-neutral-600" style={{ borderColor: "var(--border)" }}>
+          Couro legítimo, acabamento artesanal e atendimento via WhatsApp para cada pedido.
         </div>
       </div>
     </div>
