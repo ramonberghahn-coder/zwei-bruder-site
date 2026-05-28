@@ -24,7 +24,18 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
     <form action={onSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
       <input className="input" name="storeName" defaultValue={initial.storeName} placeholder="Nome da marca" />
       <input className="input" name="storeTagline" defaultValue={initial.storeTagline} placeholder="Slogan" />
-      <input className="input" name="whatsappNumber" defaultValue={initial.whatsappNumber} placeholder="WhatsApp da empresa" />
+      <input
+        className="input"
+        name="whatsappNumber"
+        defaultValue={initial.whatsappNumber}
+        placeholder="WhatsApp (só números, com DDI: 5511999999999)"
+      />
+      <input
+        className="input"
+        name="instagram"
+        defaultValue={initial.instagram}
+        placeholder="Instagram (@usuario ou URL completa)"
+      />
       <input className="input" name="contactEmail" defaultValue={initial.contactEmail} placeholder="Email de contato" />
       <input className="input" name="pixKey" defaultValue={initial.pixKey} placeholder="Chave PIX" />
       <input className="input" name="pixMerchantName" defaultValue={initial.pixMerchantName} placeholder="Nome recebedor PIX" />

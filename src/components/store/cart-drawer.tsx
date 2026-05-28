@@ -103,7 +103,7 @@ export default function CartDrawer() {
 
   if (!ready) {
     return (
-      <button type="button" className="text-sm text-neutral-600" disabled>
+      <button type="button" className="nav-link opacity-50" disabled>
         Carrinho
       </button>
     );
@@ -111,7 +111,7 @@ export default function CartDrawer() {
 
   return (
     <>
-      <button type="button" className="text-sm text-neutral-600 hover:text-black" onClick={() => setOpen(true)}>
+      <button type="button" className="nav-link" onClick={() => setOpen(true)}>
         Carrinho ({count})
       </button>
 

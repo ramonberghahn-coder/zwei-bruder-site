@@ -1,13 +1,15 @@
-import { storeSettingsDefaults } from "@/lib/settings";
+import { getSettings } from "@/lib/settings";
+import TopBar from "@/components/store/top-bar";
 import Header from "@/components/store/header";
 import Footer from "@/components/store/footer";
 
-export default function ShopLayout({ children }: { children: React.ReactNode }) {
-  const settings = storeSettingsDefaults;
+export default async function ShopLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSettings();
 
   return (
     <>
-      <Header storeName={settings.storeName} />
+      <TopBar settings={settings} />
+      <Header settings={settings} />
       <main>{children}</main>
       <Footer settings={settings} />
     </>

@@ -14,7 +14,7 @@ async function main() {
     pixMerchantCity: "SAO PAULO",
     aboutText:
       "Artesanato em aço e couro. Cada peça é pensada para durar uma vida inteira.",
-    instagram: "",
+    instagram: "@zweibruder",
   };
 
   for (const [key, value] of Object.entries(defaults)) {

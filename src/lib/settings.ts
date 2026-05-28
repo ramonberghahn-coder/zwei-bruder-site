@@ -23,7 +23,7 @@ export const storeSettingsDefaults: StoreSettings = {
   pixMerchantName: "ZWEI BRUDER",
   pixMerchantCity: "SAO PAULO",
   aboutText: "",
-  instagram: "",
+  instagram: "@zweibruder",
 };
 
 function hasDatabaseUrl(): boolean {
