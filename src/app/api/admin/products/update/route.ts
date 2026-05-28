@@ -1,14 +1,16 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth-admin";
+import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
 import { prisma } from "@/lib/prisma";
 
 const schema = z.object({
   name: z.string().min(2),
   description: z.string().min(5),
-  price: z.number().positive(),
+  price: z.coerce.number().positive(),
   category: z.string().min(2),
-  stock: z.number().int().min(0),
+  stock: z.coerce.number().int().min(0),
   featured: z.boolean().optional(),
   active: z.boolean().optional(),
   images: z.string().optional(),
@@ -19,6 +21,7 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   try {
+    await assertDatabase();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -43,11 +46,16 @@ export async function POST(req: Request) {
       },
     });
 
+    revalidatePath("/");
+    revalidatePath(`/produto/${id}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Falha ao atualizar produto" },
-      { status: 400 }
-    );
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues.map((i) => i.message).join(". ") },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ error: prismaErrorMessage(error) }, { status: 400 });
   }
 }

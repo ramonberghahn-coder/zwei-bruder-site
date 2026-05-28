@@ -4,16 +4,12 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtectedAdmin =
-    (pathname.startsWith("/admin") && pathname !== "/admin/login") ||
-    (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login");
+  const isProtectedAdminPage =
+    pathname.startsWith("/admin") && pathname !== "/admin/login";
 
-  if (isProtectedAdmin) {
+  if (isProtectedAdminPage) {
     const hasSessionCookie = request.cookies.has("zwei-bruder-admin");
     if (!hasSessionCookie) {
-      if (pathname.startsWith("/api/admin")) {
-        return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-      }
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);

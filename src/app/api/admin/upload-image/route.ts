@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth-admin";
+import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -12,6 +13,7 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   try {
+    await assertDatabase();
     const formData = await req.formData();
     const image = formData.get("image");
 
@@ -43,9 +45,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: `/uploads/${fileName}` });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Erro no upload da imagem." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: prismaErrorMessage(error) }, { status: 500 });
   }
 }

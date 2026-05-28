@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { adminFetch, readAdminError } from "@/lib/admin-fetch";
 
 export default function AdminLoginForm() {
   const router = useRouter();
@@ -16,15 +17,14 @@ export default function AdminLoginForm() {
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/admin/login", {
+    const res = await adminFetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error || "Falha no login.");
+      setError(await readAdminError(res));
       setLoading(false);
       return;
     }

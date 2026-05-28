@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionSafe } from "@/lib/session";
 import AdminLogoutButton from "@/components/admin/logout-button";
+import DatabaseBanner from "@/components/admin/database-banner";
 
 export default async function ProtectedAdminLayout({
   children,
@@ -15,6 +16,7 @@ export default async function ProtectedAdminLayout({
 
   return (
     <>
+      <DatabaseBanner />
       <header className="border-b border-neutral-200">
         <div className="container flex h-14 items-center justify-between">
           <nav className="flex items-center gap-5 text-sm text-neutral-600">
