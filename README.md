@@ -18,7 +18,7 @@ E-commerce para marca de facas e acessórios em couro, com visual limpo inspirad
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
-- Prisma + SQLite
+- Prisma + PostgreSQL (Neon)
 
 ## Como rodar
 
@@ -30,14 +30,16 @@ E-commerce para marca de facas e acessórios em couro, com visual limpo inspirad
 npm install
 ```
 
-4. Gere banco e seed:
+4. Configure `DATABASE_URL` no `.env` (Neon/Postgres).
+
+5. Gere banco e seed:
 
 ```bash
 npm run db:push
 npm run db:seed
 ```
 
-5. Rode em desenvolvimento:
+6. Rode em desenvolvimento:
 
 ```bash
 npm run dev
@@ -63,13 +65,17 @@ Abra http://localhost:3000.
 1. Faça push deste projeto para um repositório no GitHub.
 2. Na Render, clique em **New +** -> **Blueprint**.
 3. Conecte o repositório e selecione a branch principal.
-4. A Render vai ler o arquivo `render.yaml` e criar:
-   - 1 Web Service Node.js
-   - 1 disco persistente em `/var/data` (usado pelo SQLite)
-5. Em **Environment**, confirme/edite:
+4. Crie um banco gratuito no Neon e copie a connection string (`postgresql://...`).
+5. Em **Environment**, configure:
+   - `DATABASE_URL` = connection string do Neon
    - `NEXT_PUBLIC_SITE_URL=https://SEU-DOMINIO.onrender.com`
    - `ADMIN_PASSWORD` com uma senha forte para o painel
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
 6. Rode o primeiro deploy.
+7. (Opcional, recomendado no primeiro deploy) abra o Shell da Render e rode:
 
-Com isso, o banco é criado automaticamente no start via `npm run db:push`.
+```bash
+npm run db:seed
+```
+
+O schema é aplicado automaticamente no start via `npm run db:push`.
