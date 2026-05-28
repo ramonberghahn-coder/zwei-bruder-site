@@ -1,9 +1,8 @@
 ﻿"use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { useCart } from "@/contexts/cart-context";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, productImageUrl } from "@/lib/utils";
 
 type ProductDetailsProps = {
   product: {
@@ -20,19 +19,13 @@ type ProductDetailsProps = {
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
-  const image = product.images[0] || "https://picsum.photos/800/600";
+  const image = productImageUrl(product.images[0]);
 
   return (
     <div className="container grid gap-10 py-12 md:grid-cols-2 md:py-16">
       <div className="relative aspect-[4/5] bg-neutral-100">
-        <Image
-          src={image}
-          alt={product.name}
-          fill
-          unoptimized
-          className="object-cover"
-          priority
-        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
       </div>
       <div className="md:pt-6">
         <p className="eyebrow">Produto</p>

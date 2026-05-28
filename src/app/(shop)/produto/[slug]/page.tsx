@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/store/product-details";
 import { prisma } from "@/lib/prisma";
-import { parseImages } from "@/lib/utils";
+import { parseImages, productImageUrl } from "@/lib/utils";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         description: product.description,
         price: product.price,
         stock: product.stock,
-        images: parseImages(product.images),
+        images: parseImages(product.images).map((url) => productImageUrl(url)),
       }}
     />
   );

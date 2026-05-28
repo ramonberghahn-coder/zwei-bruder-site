@@ -13,7 +13,7 @@ export type StoreSettings = {
   instagram: string;
 };
 
-const DEFAULTS: StoreSettings = {
+export const storeSettingsDefaults: StoreSettings = {
   storeName: "Zwei Brüder",
   storeTagline: "Facas e acessórios em couro",
   whatsappNumber: "5511999999999",
@@ -26,13 +26,24 @@ const DEFAULTS: StoreSettings = {
   instagram: "",
 };
 
+function hasDatabaseUrl(): boolean {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
 export async function getSettings(): Promise<StoreSettings> {
+  if (!hasDatabaseUrl()) return storeSettingsDefaults;
+
   try {
-    const rows = await prisma.setting.findMany();
+    const rows = await Promise.race([
+      prisma.setting.findMany(),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("database timeout")), 8_000);
+      }),
+    ]);
     const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
-    return { ...DEFAULTS, ...map } as StoreSettings;
+    return { ...storeSettingsDefaults, ...map } as StoreSettings;
   } catch {
-    return DEFAULTS;
+    return storeSettingsDefaults;
   }
 }
 

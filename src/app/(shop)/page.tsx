@@ -1,6 +1,6 @@
 import ProductCard from "@/components/store/product-card";
 import { prisma } from "@/lib/prisma";
-import { parseImages } from "@/lib/utils";
+import { parseImages, productImageUrl } from "@/lib/utils";
 
 export default async function HomePage() {
   let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
@@ -48,7 +48,7 @@ export default async function HomePage() {
                   price: p.price,
                   compareAt: p.compareAt,
                   stock: p.stock,
-                  images: parseImages(p.images),
+                  images: parseImages(p.images).map((url) => productImageUrl(url)),
                 }}
               />
             ))}

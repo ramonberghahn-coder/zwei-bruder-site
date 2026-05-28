@@ -1,9 +1,8 @@
 ﻿"use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, productImageUrl } from "@/lib/utils";
 
 type ProductCardProps = {
   product: {
@@ -19,20 +18,14 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
-  const image = product.images[0] || "https://picsum.photos/800/600";
+  const image = productImageUrl(product.images[0]);
 
   return (
     <article className="group">
       <Link href={`/produto/${product.slug}`}>
         <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
-          <Image
-            src={image}
-            alt={product.name}
-            fill
-            unoptimized
-            className="object-cover"
-            sizes="(max-width:768px) 100vw, 33vw"
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
         </div>
       </Link>
 

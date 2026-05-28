@@ -8,10 +8,21 @@ export function formatCurrency(value: number): string {
 export function parseImages(json: string): string[] {
   try {
     const parsed = JSON.parse(json);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.filter((u) => typeof u === "string" && u.trim()) : [];
   } catch {
     return [];
   }
+}
+
+const FALLBACK_IMAGE = "https://picsum.photos/800/600";
+
+export function productImageUrl(url: string | undefined): string {
+  const trimmed = url?.trim();
+  if (!trimmed) return FALLBACK_IMAGE;
+  if (trimmed.startsWith("/") || trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  return FALLBACK_IMAGE;
 }
 
 export function generateOrderNumber(): string {
