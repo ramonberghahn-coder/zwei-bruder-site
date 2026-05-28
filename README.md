@@ -65,17 +65,13 @@ Abra http://localhost:3000.
 1. Faça push deste projeto para um repositório no GitHub.
 2. Na Render, clique em **New +** -> **Blueprint**.
 3. Conecte o repositório e selecione a branch principal.
-4. Crie um banco gratuito no Neon e copie a connection string (`postgresql://...`).
+4. Crie um banco gratuito no Neon e copie a connection string **direct** (`postgresql://...` **sem** `-pooler` no host).
 5. Em **Environment**, configure:
-   - `DATABASE_URL` = connection string do Neon
+   - `DATABASE_URL` = connection string direct do Neon (obrigatório)
    - `NEXT_PUBLIC_SITE_URL=https://SEU-DOMINIO.onrender.com`
    - `ADMIN_PASSWORD` com uma senha forte para o painel
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
 6. Rode o primeiro deploy.
-7. (Opcional, recomendado no primeiro deploy) abra o Shell da Render e rode:
 
-```bash
-npm run db:seed
-```
-
-O schema é aplicado automaticamente no start via `npm run db:push`.
+O schema e seed inicial rodam automaticamente no **build** (`prisma db push` + `seed.mjs`).
+O **start** só sobe o Next.js (`npm run start`).

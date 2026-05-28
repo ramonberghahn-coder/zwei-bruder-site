@@ -3,8 +3,8 @@ services:
     name: zwei-bruder-site
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run db:push && npm run start
+    buildCommand: npm install && npx prisma db push && (node prisma/seed.mjs || true) && npm run build
+    startCommand: npm run start
     envVars:
       - key: NODE_VERSION
         value: 24.16.0

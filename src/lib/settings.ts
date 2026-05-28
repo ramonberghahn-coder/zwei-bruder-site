@@ -27,9 +27,13 @@ const DEFAULTS: StoreSettings = {
 };
 
 export async function getSettings(): Promise<StoreSettings> {
-  const rows = await prisma.setting.findMany();
-  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
-  return { ...DEFAULTS, ...map } as StoreSettings;
+  try {
+    const rows = await prisma.setting.findMany();
+    const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+    return { ...DEFAULTS, ...map } as StoreSettings;
+  } catch {
+    return DEFAULTS;
+  }
 }
 
 export async function updateSettings(

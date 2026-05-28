@@ -3,10 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { parseImages } from "@/lib/utils";
 
 export default async function HomePage() {
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-  });
+  let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  try {
+    products = await prisma.product.findMany({
+      where: { active: true },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    });
+  } catch {
+    products = [];
+  }
 
   const featured = products.slice(0, 6);
 
@@ -52,6 +57,12 @@ export default async function HomePage() {
             Seleção com visual premium e performance para uso real no dia a dia.
           </p>
         </div>
+
+        {featured.length === 0 ? (
+          <p className="text-sm text-neutral-600">
+            Nenhum produto ativo no momento. Cadastre em /admin/produtos/novo.
+          </p>
+        ) : null}
 
         <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((p) => (
