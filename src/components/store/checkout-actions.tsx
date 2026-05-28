@@ -43,7 +43,7 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
         <h2 className="text-sm font-medium">Pagamento PIX</h2>
         {qrDataUrl ? (
           <div className="mt-4">
-            <Image src={qrDataUrl} alt="QR Code PIX" width={240} height={240} />
+            <Image src={qrDataUrl} alt="QR Code PIX" width={240} height={240} unoptimized />
           </div>
         ) : null}
         <textarea className="textarea mt-4" rows={4} readOnly value={pixPayload} />

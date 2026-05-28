@@ -5,7 +5,13 @@ import { parseImages } from "@/lib/utils";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug } });
+
+  let product = null;
+  try {
+    product = await prisma.product.findUnique({ where: { slug } });
+  } catch {
+    product = null;
+  }
 
   if (!product || !product.active) return notFound();
 

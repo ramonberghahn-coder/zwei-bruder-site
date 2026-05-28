@@ -21,7 +21,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const image = product.images[0] || "https://picsum.photos/800/600";
-  const isLocalImage = image.startsWith("/");
 
   return (
     <div className="container grid gap-10 py-12 md:grid-cols-2 md:py-16">
@@ -30,7 +29,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           src={image}
           alt={product.name}
           fill
-          unoptimized={isLocalImage}
+          unoptimized
           className="object-cover"
           priority
         />

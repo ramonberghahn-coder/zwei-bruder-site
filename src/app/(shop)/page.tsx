@@ -1,4 +1,4 @@
-﻿import ProductCard from "@/components/store/product-card";
+import ProductCard from "@/components/store/product-card";
 import { prisma } from "@/lib/prisma";
 import { parseImages } from "@/lib/utils";
 

@@ -179,7 +179,7 @@ export default function CartDrawer() {
                   </p>
                   {payment.qrDataUrl ? (
                     <div className="flex justify-center border border-neutral-200 p-4">
-                      <Image src={payment.qrDataUrl} alt="QR Code PIX" width={220} height={220} />
+                      <Image src={payment.qrDataUrl} alt="QR Code PIX" width={220} height={220} unoptimized />
                     </div>
                   ) : null}
                   <div>

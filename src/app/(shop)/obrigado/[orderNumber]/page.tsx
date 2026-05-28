@@ -9,20 +9,29 @@ export default async function ThankYouPage({
   params: Promise<{ orderNumber: string }>;
 }) {
   const { orderNumber } = await params;
-  const order = await prisma.order.findUnique({ where: { orderNumber } });
+
+  let order = null;
+  let qrDataUrl: string | null = null;
+
+  try {
+    order = await prisma.order.findUnique({ where: { orderNumber } });
+    if (order?.pixPayload) {
+      qrDataUrl = await generatePixQrDataUrl(order.pixPayload);
+    }
+  } catch {
+    order = null;
+  }
 
   if (!order) {
     return (
       <div className="container py-16">
-        <h1 className="text-2xl font-semibold">Pedido não encontrado</h1>
-        <Link href="/" className="btn btn-primary mt-4">
+        <h1 className="text-2xl font-medium">Pedido não encontrado</h1>
+        <Link href="/" className="btn btn-primary mt-4 inline-flex">
           Voltar para loja
         </Link>
       </div>
     );
   }
-
-  const qrDataUrl = order.pixPayload ? await generatePixQrDataUrl(order.pixPayload) : null;
 
   return (
     <div className="container py-12 md:py-16">

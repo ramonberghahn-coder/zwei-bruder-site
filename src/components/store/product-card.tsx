@@ -20,7 +20,6 @@ type ProductCardProps = {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const image = product.images[0] || "https://picsum.photos/800/600";
-  const isLocalImage = image.startsWith("/");
 
   return (
     <article className="group">
@@ -30,7 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={image}
             alt={product.name}
             fill
-            unoptimized={isLocalImage}
+            unoptimized
             className="object-cover"
             sizes="(max-width:768px) 100vw, 33vw"
           />

@@ -3,8 +3,6 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", pathname);
 
   const isProtectedAdmin =
     (pathname.startsWith("/admin") && pathname !== "/admin/login") ||
@@ -22,9 +20,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return NextResponse.next();
 }
 
 export const config = {

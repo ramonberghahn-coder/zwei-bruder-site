@@ -2,7 +2,13 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminPage() {
-  const [products, orders] = await Promise.all([prisma.product.count(), prisma.order.count()]);
+  let products = 0;
+  let orders = 0;
+  try {
+    [products, orders] = await Promise.all([prisma.product.count(), prisma.order.count()]);
+  } catch {
+    // banco ainda não configurado
+  }
 
   return (
     <div className="container py-10">
