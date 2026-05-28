@@ -73,5 +73,10 @@ Abra http://localhost:3000.
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
 6. Rode o primeiro deploy.
 
-O schema e seed inicial rodam automaticamente no **build** (`prisma db push` + `seed.mjs`).
-O **start** só sobe o Next.js (`npm run start`).
+7. Após ficar **Live**, abra uma vez no navegador:
+
+`https://SEU-SITE.onrender.com/api/setup?token=SUA_ADMIN_PASSWORD`
+
+Isso cria as tabelas no Neon e carrega os dados iniciais.
+
+> O build não depende mais do banco (evita falha de deploy). A configuração do banco é feita nesse passo único.
