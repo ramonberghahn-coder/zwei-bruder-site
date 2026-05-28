@@ -22,25 +22,30 @@ export default function ProductCard({ product }: ProductCardProps) {
   const image = product.images[0] || "https://picsum.photos/800/600";
 
   return (
-    <article className="card overflow-hidden">
+    <article className="card group overflow-hidden">
       <Link href={`/produto/${product.slug}`}>
-        <div className="relative aspect-[4/3] bg-neutral-100">
-          <Image src={image} alt={product.name} fill className="object-cover" />
+        <div className="relative aspect-[4/5] bg-neutral-100">
+          <Image
+            src={image}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         </div>
       </Link>
 
-      <div className="space-y-2 p-4">
-        <h3 className="font-medium">{product.name}</h3>
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">{formatCurrency(product.price)}</span>
+      <div className="space-y-3 p-5">
+        <h3 className="text-xl font-semibold leading-tight">{product.name}</h3>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-lg font-semibold">{formatCurrency(product.price)}</span>
           {product.compareAt ? (
-            <span className="text-sm text-neutral-500 line-through">
+            <span className="text-neutral-500 line-through">
               {formatCurrency(product.compareAt)}
             </span>
           ) : null}
         </div>
         <button
-          className="btn btn-primary w-full"
+          className="btn btn-secondary w-full"
           disabled={product.stock <= 0}
           onClick={() =>
             addItem({
@@ -54,7 +59,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             })
           }
         >
-          {product.stock > 0 ? "Adicionar ao carrinho" : "Sem estoque"}
+          {product.stock > 0 ? "Adicionar ao carrinho" : "Indisponível"}
         </button>
       </div>
     </article>
