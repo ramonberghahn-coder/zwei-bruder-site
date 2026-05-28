@@ -6,11 +6,10 @@ export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
-    <div className="container py-12">
+    <div className="container py-10">
       <div className="flex items-center justify-between">
         <div>
-          <p className="subtitle">Catálogo</p>
-          <h1 className="mt-2 text-5xl font-semibold">Produtos</h1>
+          <h1 className="text-2xl font-medium">Produtos</h1>
         </div>
         <Link className="btn btn-primary" href="/admin/produtos/novo">
           Novo produto

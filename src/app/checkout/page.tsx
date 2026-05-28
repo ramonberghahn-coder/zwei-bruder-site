@@ -41,40 +41,36 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container grid gap-8 py-12 md:grid-cols-[1.15fr_0.85fr]">
-      <form action={reserveOrder} className="card space-y-4 p-6">
-        <p className="subtitle">Checkout</p>
-        <h1 className="text-4xl font-semibold">Reserva e pagamento</h1>
+    <div className="container grid gap-10 py-12 md:grid-cols-2 md:py-16">
+      <form action={reserveOrder} className="space-y-4">
+        <h1 className="text-2xl font-medium">Checkout</h1>
         <input name="customerName" placeholder="Nome completo" className="input" required />
         <input name="customerPhone" placeholder="WhatsApp (com DDD)" className="input" required />
         <input name="customerEmail" placeholder="Email" className="input" />
         <input name="address" placeholder="Endereço (opcional)" className="input" />
-        <textarea name="notes" placeholder="Observações" className="textarea" rows={4} />
-
+        <textarea name="notes" placeholder="Observações" className="textarea" rows={3} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-
         <button className="btn btn-primary w-full" disabled={loading || items.length === 0}>
           {loading ? "Reservando..." : "Reservar e gerar PIX"}
         </button>
       </form>
 
-      <aside className="card h-fit p-6">
-        <h2 className="text-2xl font-semibold">Resumo do pedido</h2>
-        <div className="mt-4 space-y-3">
+      <aside className="border border-neutral-200 p-6">
+        <h2 className="text-sm font-medium">Resumo</h2>
+        <div className="mt-4 space-y-2">
           {items.map((item) => (
-            <div key={item.productId} className="flex items-center justify-between text-sm">
-              <span>{item.quantity}x {item.name}</span>
+            <div key={item.productId} className="flex justify-between text-sm text-neutral-600">
+              <span>
+                {item.quantity}x {item.name}
+              </span>
               <span>{formatCurrency(item.quantity * item.price)}</span>
             </div>
           ))}
-          {items.length === 0 && <p className="text-sm text-neutral-500">Seu carrinho está vazio.</p>}
+          {items.length === 0 && <p className="text-sm text-neutral-500">Carrinho vazio.</p>}
         </div>
-        <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-          <p className="text-lg font-semibold">Total: {formatCurrency(total)}</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            Após reservar, você receberá o PIX com QR Code e envio via WhatsApp.
-          </p>
-        </div>
+        <p className="mt-6 border-t border-neutral-200 pt-4 text-base font-medium">
+          Total {formatCurrency(total)}
+        </p>
       </aside>
     </div>
   );

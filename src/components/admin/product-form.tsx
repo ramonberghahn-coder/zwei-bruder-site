@@ -71,7 +71,7 @@ export default function ProductForm({
   }
 
   return (
-    <form action={onSubmit} className="card mt-8 space-y-4 p-6">
+    <form action={onSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
       <input name="name" className="input" placeholder="Nome" defaultValue={initial?.name} required />
       <textarea
         name="description"

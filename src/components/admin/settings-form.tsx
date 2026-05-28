@@ -21,7 +21,7 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
   }
 
   return (
-    <form action={onSubmit} className="card mt-8 space-y-4 p-6">
+    <form action={onSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
       <input className="input" name="storeName" defaultValue={initial.storeName} placeholder="Nome da marca" />
       <input className="input" name="storeTagline" defaultValue={initial.storeTagline} placeholder="Slogan" />
       <input className="input" name="whatsappNumber" defaultValue={initial.whatsappNumber} placeholder="WhatsApp da empresa" />

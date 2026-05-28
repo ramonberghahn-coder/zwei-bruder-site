@@ -25,11 +25,10 @@ export default async function ThankYouPage({
   const qrDataUrl = order.pixPayload ? await generatePixQrDataUrl(order.pixPayload) : null;
 
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-semibold">Pedido {order.orderNumber} reservado</h1>
-      <p className="mt-2 text-neutral-600">
-        Faça o pagamento via PIX e envie o comprovante. Em seguida, o WhatsApp Web será aberto
-        automaticamente.
+    <div className="container py-12 md:py-16">
+      <h1 className="text-2xl font-medium">Pedido {order.orderNumber}</h1>
+      <p className="mt-2 text-sm text-neutral-600">
+        Pague via PIX, envie o comprovante e confirme no WhatsApp.
       </p>
       <CheckoutActions
         orderNumber={order.orderNumber}

@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import { CartProvider } from "@/contexts/cart-context";
 import { getSettings } from "@/lib/settings";
@@ -19,14 +20,16 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const settings = await getSettings();
+  const pathname = (await headers()).get("x-pathname") || "";
+  const isAdminArea = pathname.startsWith("/admin");
 
   return (
     <html lang="pt-BR">
       <body>
         <CartProvider>
-          <Header storeName={settings.storeName} />
+          {!isAdminArea ? <Header storeName={settings.storeName} /> : null}
           <main>{children}</main>
-          <Footer settings={settings} />
+          {!isAdminArea ? <Footer settings={settings} /> : null}
         </CartProvider>
       </body>
     </html>

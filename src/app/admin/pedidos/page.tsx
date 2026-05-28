@@ -5,9 +5,8 @@ export default async function OrdersPage() {
   const orders = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
-    <div className="container py-12">
-      <p className="subtitle">Operação</p>
-      <h1 className="mt-2 text-5xl font-semibold">Pedidos</h1>
+    <div className="container py-10">
+      <h1 className="text-2xl font-medium">Pedidos</h1>
       <div className="mt-8 space-y-4">
         {orders.map((order) => (
           <article key={order.id} className="card p-5">

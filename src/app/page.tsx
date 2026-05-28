@@ -13,73 +13,47 @@ export default async function HomePage() {
     products = [];
   }
 
-  const featured = products.slice(0, 6);
-
   return (
     <div>
-      <section className="premium-hero border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="container grid min-h-[65vh] items-center gap-10 py-16 md:grid-cols-[1.15fr_0.85fr]">
-          <div>
-            <p className="subtitle">Linha artesanal</p>
-            <h1 className="section-title mt-4 font-semibold">Facas e couro feitos para durar gerações.</h1>
-            <p className="mt-6 max-w-2xl text-base text-neutral-700">
-              Peças premium com acabamento manual, design limpo e materiais selecionados para
-              acompanhar rotina, coleção e legado.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#produtos" className="btn btn-primary">
-                Comprar agora
-              </a>
-              <a href="/checkout" className="btn btn-secondary">
-                Reservar pedido
-              </a>
-            </div>
-          </div>
-          <div className="card p-7">
-            <p className="subtitle">Diferenciais</p>
-            <ul className="mt-4 space-y-3 text-sm text-neutral-700">
-              <li>• Couro legítimo com acabamento artesanal.</li>
-              <li>• Lâminas selecionadas e controle de qualidade por peça.</li>
-              <li>• Atendimento direto no WhatsApp para cada pedido.</li>
-              <li>• Pagamento via PIX com confirmação rápida.</li>
-            </ul>
-          </div>
-        </div>
+      <section className="container border-b border-neutral-200 py-16 md:py-24">
+        <p className="eyebrow">Coleção</p>
+        <h1 className="mt-3 max-w-2xl text-4xl font-medium leading-tight md:text-5xl">
+          Facas e acessórios em couro, feitos para durar.
+        </h1>
+        <p className="mt-4 max-w-xl text-neutral-600">
+          Design limpo, materiais selecionados e atendimento direto para cada pedido.
+        </p>
+        <a href="#produtos" className="btn btn-primary mt-8 inline-flex">
+          Ver produtos
+        </a>
       </section>
 
-      <section id="produtos" className="container py-14">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="subtitle">Produtos em destaque</p>
-            <h2 className="mt-2 text-5xl font-semibold">Coleção principal</h2>
-          </div>
-          <p className="hidden max-w-sm text-right text-sm text-neutral-600 md:block">
-            Seleção com visual premium e performance para uso real no dia a dia.
-          </p>
+      <section id="produtos" className="container py-16 md:py-20">
+        <div className="mb-10 flex items-baseline justify-between gap-4">
+          <h2 className="text-xl font-medium">Produtos</h2>
+          <p className="text-sm text-neutral-500">{products.length} itens</p>
         </div>
 
-        {featured.length === 0 ? (
-          <p className="text-sm text-neutral-600">
-            Nenhum produto ativo no momento. Cadastre em /admin/produtos/novo.
-          </p>
-        ) : null}
-
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((p) => (
-            <ProductCard
-              key={p.id}
-              product={{
-                id: p.id,
-                slug: p.slug,
-                name: p.name,
-                price: p.price,
-                compareAt: p.compareAt,
-                stock: p.stock,
-                images: parseImages(p.images),
-              }}
-            />
-          ))}
-        </section>
+        {products.length === 0 ? (
+          <p className="text-sm text-neutral-500">Nenhum produto cadastrado ainda.</p>
+        ) : (
+          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={{
+                  id: p.id,
+                  slug: p.slug,
+                  name: p.name,
+                  price: p.price,
+                  compareAt: p.compareAt,
+                  stock: p.stock,
+                  images: parseImages(p.images),
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

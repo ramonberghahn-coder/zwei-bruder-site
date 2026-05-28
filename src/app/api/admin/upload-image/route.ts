@@ -2,11 +2,15 @@ import { randomUUID } from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/auth-admin";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: Request) {
+  const unauthorized = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   try {
     const formData = await req.formData();
     const image = formData.get("image");

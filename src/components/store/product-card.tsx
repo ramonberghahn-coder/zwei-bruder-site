@@ -22,30 +22,21 @@ export default function ProductCard({ product }: ProductCardProps) {
   const image = product.images[0] || "https://picsum.photos/800/600";
 
   return (
-    <article className="card group overflow-hidden">
+    <article className="group">
       <Link href={`/produto/${product.slug}`}>
-        <div className="relative aspect-[4/5] bg-neutral-100">
-          <Image
-            src={image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+        <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+          <Image src={image} alt={product.name} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
         </div>
       </Link>
 
-      <div className="space-y-3 p-5">
-        <h3 className="text-xl font-semibold leading-tight">{product.name}</h3>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-lg font-semibold">{formatCurrency(product.price)}</span>
-          {product.compareAt ? (
-            <span className="text-neutral-500 line-through">
-              {formatCurrency(product.compareAt)}
-            </span>
-          ) : null}
-        </div>
+      <div className="mt-4 space-y-2">
+        <Link href={`/produto/${product.slug}`}>
+          <h3 className="text-sm font-medium">{product.name}</h3>
+        </Link>
+        <p className="text-sm text-neutral-600">{formatCurrency(product.price)}</p>
         <button
-          className="btn btn-secondary w-full"
+          type="button"
+          className="text-sm text-neutral-500 underline-offset-4 hover:text-black hover:underline"
           disabled={product.stock <= 0}
           onClick={() =>
             addItem({
@@ -59,7 +50,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             })
           }
         >
-          {product.stock > 0 ? "Adicionar ao carrinho" : "Indisponível"}
+          {product.stock > 0 ? "Adicionar" : "Esgotado"}
         </button>
       </div>
     </article>

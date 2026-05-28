@@ -1,6 +1,7 @@
 import slugify from "slugify";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminApi } from "@/lib/auth-admin";
 import { prisma } from "@/lib/prisma";
 
 const schema = z.object({
@@ -15,6 +16,9 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const unauthorized = await requireAdminApi();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = schema.parse(await req.json());
     const slugBase = slugify(body.name, { lower: true, strict: true });

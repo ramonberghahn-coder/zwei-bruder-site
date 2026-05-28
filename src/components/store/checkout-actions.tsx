@@ -38,22 +38,19 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
   }
 
   return (
-    <div className="mt-8 grid gap-6 md:grid-cols-2">
-      <section className="card p-6">
-        <p className="subtitle">Passo 1</p>
-        <h2 className="text-3xl font-semibold">Pague no PIX</h2>
+    <div className="mt-10 grid gap-8 md:grid-cols-2">
+      <section className="border border-neutral-200 p-6">
+        <h2 className="text-sm font-medium">Pagamento PIX</h2>
         {qrDataUrl ? (
           <div className="mt-4">
-            <Image src={qrDataUrl} alt="QR Code PIX" width={280} height={280} />
+            <Image src={qrDataUrl} alt="QR Code PIX" width={240} height={240} />
           </div>
         ) : null}
-        <p className="mt-3 text-sm text-neutral-600">Se preferir, copie o código PIX:</p>
-        <textarea className="textarea mt-2" rows={4} readOnly value={pixPayload} />
+        <textarea className="textarea mt-4" rows={4} readOnly value={pixPayload} />
       </section>
 
-      <section className="card p-6">
-        <p className="subtitle">Passo 2</p>
-        <h2 className="text-3xl font-semibold">Envie comprovante e abra WhatsApp</h2>
+      <section className="border border-neutral-200 p-6">
+        <h2 className="text-sm font-medium">Comprovante</h2>
         <input
           type="file"
           accept="image/*,.pdf"
@@ -62,7 +59,7 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
         />
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         <button className="btn btn-primary mt-4 w-full" disabled={sending} onClick={handleSendWhatsApp}>
-          {sending ? "Enviando..." : "Enviar pedido no WhatsApp"}
+          {sending ? "Enviando..." : "Enviar no WhatsApp"}
         </button>
       </section>
     </div>
