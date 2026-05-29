@@ -1,10 +1,16 @@
 ﻿@import "tailwindcss";
 
 :root {
+  /* Paleta couro/aço: tons quentes e profundos */
   --background: #ffffff;
-  --foreground: #1a1a1a;
-  --muted: #6b6b6b;
-  --border: #e8e8e8;
+  --foreground: #211b16; /* espresso quase preto */
+  --muted: #6f655c; /* taupe */
+  --border: #e7e0d8; /* areia clara */
+  --surface: #f7f4f0; /* fundo suave */
+  --accent: #8a5a33; /* couro */
+  --accent-hover: #74492a;
+  --radius: 6px;
+  --radius-lg: 10px;
   --font-display: var(--font-cormorant), "Times New Roman", serif;
   --font-sans: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
 }
@@ -74,15 +80,24 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 0.85rem 1.75rem;
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.05s ease;
   border: 1px solid transparent;
   cursor: pointer;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -90,8 +105,8 @@ a {
   color: #fff;
 }
 
-.btn-primary:hover {
-  opacity: 0.88;
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent);
 }
 
 .btn-secondary {
@@ -100,7 +115,7 @@ a {
   color: var(--foreground);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background: var(--foreground);
   color: #fff;
 }
@@ -110,23 +125,26 @@ a {
 .select {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 0.75rem 0.85rem;
   background: #fff;
   font-size: 0.9rem;
   font-family: var(--font-sans);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input:focus,
-.textarea:focus {
+.textarea:focus,
+.select:focus {
   outline: none;
-  border-color: #999;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(138, 90, 51, 0.12);
 }
 
 .card {
   border: 1px solid var(--border);
   background: #fff;
-  border-radius: 0;
+  border-radius: var(--radius-lg);
 }
 
 .eyebrow {

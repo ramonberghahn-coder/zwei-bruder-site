@@ -6,7 +6,7 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
   const wa = whatsappUrl(settings.whatsappNumber);
 
   return (
-    <footer id="contato" className="mt-20 border-t border-neutral-200 bg-neutral-50">
+    <footer id="contato" className="mt-20 border-t border-[color:var(--border)] bg-[#f7f4f0]">
       <div className="container py-14 md:py-16">
         <div className="grid gap-12 md:grid-cols-2">
           <div>

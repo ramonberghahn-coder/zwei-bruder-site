@@ -167,7 +167,7 @@ export default function CartPage() {
                     <div key={item.productId} className="flex gap-5 py-6">
                       <Link
                         href={`/produto/${item.slug}`}
-                        className="h-32 w-28 shrink-0 overflow-hidden bg-neutral-100"
+                        className="h-32 w-28 shrink-0 overflow-hidden rounded-[10px] bg-[#f7f4f0]"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
@@ -248,7 +248,7 @@ export default function CartPage() {
 
               <div className="mt-8 grid gap-8 sm:grid-cols-[240px_1fr]">
                 {payment.qrDataUrl ? (
-                  <div className="flex justify-center border border-neutral-200 p-4">
+                  <div className="flex justify-center rounded-[10px] border border-[color:var(--border)] p-4">
                     <Image src={payment.qrDataUrl} alt="QR Code PIX" width={208} height={208} unoptimized />
                   </div>
                 ) : null}
@@ -281,7 +281,7 @@ export default function CartPage() {
 
         {/* Coluna direita: resumo do pedido */}
         <aside className="lg:sticky lg:top-28 lg:h-fit">
-          <div className="border border-neutral-200 p-6">
+          <div className="card p-6">
             <h2 className="text-lg font-medium">Resumo do pedido</h2>
 
             <dl className="mt-6 space-y-3 text-sm">

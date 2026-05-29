@@ -22,7 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="group text-center">
       <Link href={`/produto/${product.slug}`} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[10px] bg-[#f7f4f0]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}

@@ -41,7 +41,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="container grid gap-12 py-12 md:grid-cols-2 md:gap-16 md:py-20">
-      <div className="relative aspect-[4/5] bg-neutral-100">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[10px] bg-[#f7f4f0]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
       </div>
