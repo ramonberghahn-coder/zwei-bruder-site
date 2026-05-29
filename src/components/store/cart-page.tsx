@@ -237,7 +237,7 @@ export default function CartPage() {
 
                         {waitlist ? (
                           <span className="mt-2 inline-block w-fit bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800">
-                            Fila de espera (sob encomenda)
+                            Sob encomenda
                           </span>
                         ) : null}
 
@@ -292,7 +292,7 @@ export default function CartPage() {
 
               {payment.hasWaitlist ? (
                 <p className="mt-4 border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  Seu pedido tem itens em <strong>fila de espera</strong>. Acertamos o prazo pelo WhatsApp.
+                  Seu pedido tem itens <strong>sob encomenda</strong>. Acertamos o prazo pelo WhatsApp.
                 </p>
               ) : null}
 
@@ -430,7 +430,7 @@ export default function CartPage() {
 
             {cartHasWaitlist && stage === "cart" ? (
               <p className="mt-4 text-xs text-amber-800">
-                Há itens em fila de espera no carrinho.
+                Há itens sob encomenda no carrinho.
               </p>
             ) : null}
 

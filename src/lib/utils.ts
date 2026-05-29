@@ -32,7 +32,7 @@ export function productImageUrl(url: string | undefined): string {
 
 /**
  * Quantidade máxima que pode ser pedida.
- * Estoque <= 0 = fila de espera (sob encomenda), permite até 99.
+ * Estoque <= 0 = sob encomenda, permite até 99.
  */
 export function maxOrderQty(stock: number): number {
   return stock > 0 ? stock : 99;

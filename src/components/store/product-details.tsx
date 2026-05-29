@@ -53,14 +53,18 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {product.name}
         </h1>
         <div className="mt-6 border-t border-neutral-200 pt-6">
-          <p className="price-label">Preço normal</p>
+          {waitlist ? (
+            <p className="text-sm font-medium uppercase tracking-wider text-amber-700">Sob encomenda</p>
+          ) : (
+            <p className="price-label">Preço normal</p>
+          )}
           <p className="mt-1 text-xl">{formatCurrency(product.price)}</p>
         </div>
         <p className="mt-6 text-sm leading-relaxed text-neutral-600">{product.description}</p>
 
         {waitlist ? (
           <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
-            Esgotado no momento — você pode entrar na <strong>fila de espera</strong> (sob encomenda).
+            Esgotado no momento — disponível <strong>sob encomenda</strong>. Combinamos o prazo no WhatsApp.
           </p>
         ) : null}
 
@@ -74,7 +78,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value), maxQty)))}
           />
           <button className="btn btn-primary flex-1 sm:flex-none" onClick={handleAdd}>
-            {waitlist ? "Entrar na fila de espera" : "Adicionar ao carrinho"}
+            {waitlist ? "Comprar sob encomenda" : "Adicionar ao carrinho"}
           </button>
         </div>
         {added ? (

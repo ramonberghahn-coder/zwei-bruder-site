@@ -37,17 +37,22 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-sm font-medium leading-snug">{product.name}</h3>
         </Link>
         <div className="space-y-0.5">
-          <p className="price-label">Preço normal</p>
-          <p className="text-sm">{formatCurrency(product.price)}</p>
-          {hasCompare ? (
-            <p className="text-xs text-neutral-400 line-through">{formatCurrency(product.compareAt!)}</p>
-          ) : null}
+          {product.stock <= 0 ? (
+            <p className="text-sm font-medium uppercase tracking-wider text-amber-700">
+              Sob encomenda
+            </p>
+          ) : (
+            <>
+              <p className="price-label">Preço normal</p>
+              <p className="text-sm">{formatCurrency(product.price)}</p>
+              {hasCompare ? (
+                <p className="text-xs text-neutral-400 line-through">
+                  {formatCurrency(product.compareAt!)}
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
-        {product.stock <= 0 ? (
-          <p className="pt-1 text-xs uppercase tracking-wider text-amber-700">
-            Sob encomenda · fila de espera
-          </p>
-        ) : null}
       </div>
     </article>
   );

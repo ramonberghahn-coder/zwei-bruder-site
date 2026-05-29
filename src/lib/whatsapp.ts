@@ -52,7 +52,7 @@ export function buildWhatsAppMessage(params: WhatsAppOrderParams): string {
     "*Itens:*",
     ...params.items.map((i) => {
       const waitlistQty = "waitlistQty" in i ? i.waitlistQty ?? 0 : 0;
-      const suffix = waitlistQty > 0 ? ` (⏳ ${waitlistQty} em fila de espera)` : "";
+      const suffix = waitlistQty > 0 ? ` (⏳ ${waitlistQty} sob encomenda)` : "";
       return `• ${i.quantity}x ${i.name} — ${formatCurrency(i.price * i.quantity)}${suffix}`;
     }),
   ];
@@ -77,7 +77,7 @@ export function buildWhatsAppMessage(params: WhatsAppOrderParams): string {
   if (hasWaitlist) {
     lines.push(
       "",
-      "Há itens em *fila de espera* (sob encomenda). Combinamos o prazo pelo WhatsApp."
+      "Há itens *sob encomenda*. Combinamos o prazo pelo WhatsApp."
     );
   }
 
