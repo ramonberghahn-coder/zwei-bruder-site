@@ -1,7 +1,19 @@
-import { prisma } from "@/lib/prisma";
+import { neon } from "@neondatabase/serverless";
+import { getAppDatabaseUrl } from "@/lib/database-url";
 
+/**
+ * Seed via driver HTTP do Neon: cada statement é uma requisição independente,
+ * sem sessão WebSocket nem transação que possa cair no host -pooler.
+ */
 export async function runSeed(): Promise<void> {
-  const defaults = {
+  const url = getAppDatabaseUrl();
+  if (!url) {
+    throw new Error("DATABASE_URL não configurada na Render.");
+  }
+
+  const sql = neon(url);
+
+  const defaults: Record<string, string> = {
     storeName: "Zwei Brüder",
     storeTagline: "Facas e acessórios em couro de alta qualidade",
     whatsappNumber: "5511999999999",
@@ -16,11 +28,11 @@ export async function runSeed(): Promise<void> {
   };
 
   for (const [key, value] of Object.entries(defaults)) {
-    await prisma.setting.upsert({
-      where: { key },
-      create: { key, value },
-      update: {},
-    });
+    await sql`
+      INSERT INTO "Setting" (key, value)
+      VALUES (${key}, ${value})
+      ON CONFLICT (key) DO NOTHING
+    `;
   }
 
   const products = [
@@ -72,10 +84,12 @@ export async function runSeed(): Promise<void> {
   ];
 
   for (const p of products) {
-    await prisma.product.upsert({
-      where: { slug: p.slug },
-      create: p,
-      update: p,
-    });
+    await sql`
+      INSERT INTO "Product"
+        (id, name, slug, description, price, "compareAt", category, images, stock, featured, active, "createdAt", "updatedAt")
+      VALUES
+        (gen_random_uuid()::text, ${p.name}, ${p.slug}, ${p.description}, ${p.price}, ${p.compareAt}, ${p.category}, ${p.images}, ${p.stock}, ${p.featured}, ${p.active}, now(), now())
+      ON CONFLICT (slug) DO NOTHING
+    `;
   }
 }
