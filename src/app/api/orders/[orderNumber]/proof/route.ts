@@ -37,6 +37,7 @@ export async function POST(
       name: string;
       price: number;
       quantity: number;
+      waitlistQty?: number;
     }>;
 
     const message = buildWhatsAppMessage({
@@ -44,13 +45,10 @@ export async function POST(
       customerName: order.customerName,
       customerPhone: order.customerPhone,
       items: items.map((i) => ({
-        productId: i.productId,
-        slug: "",
         name: i.name,
         price: i.price,
-        image: "",
         quantity: i.quantity,
-        stock: 0,
+        waitlistQty: i.waitlistQty ?? 0,
       })),
       total: order.total,
       paymentProofUrl,

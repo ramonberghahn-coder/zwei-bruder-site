@@ -30,6 +30,18 @@ export function productImageUrl(url: string | undefined): string {
   return FALLBACK_IMAGE;
 }
 
+/**
+ * Quantidade máxima que pode ser pedida.
+ * Estoque <= 0 = fila de espera (sob encomenda), permite até 99.
+ */
+export function maxOrderQty(stock: number): number {
+  return stock > 0 ? stock : 99;
+}
+
+export function isWaitlist(stock: number): boolean {
+  return stock <= 0;
+}
+
 export function generateOrderNumber(): string {
   const date = new Date();
   const y = date.getFullYear().toString().slice(-2);

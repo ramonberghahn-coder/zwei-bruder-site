@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
-import { formatCurrency, productImageUrl } from "@/lib/utils";
+import { formatCurrency, isWaitlist, maxOrderQty, productImageUrl } from "@/lib/utils";
 
 type ProductDetailsProps = {
   product: {
@@ -20,7 +20,24 @@ type ProductDetailsProps = {
 export default function ProductDetails({ product }: ProductDetailsProps) {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
   const image = productImageUrl(product.images[0]);
+  const waitlist = isWaitlist(product.stock);
+  const maxQty = maxOrderQty(product.stock);
+
+  function handleAdd() {
+    addItem({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      image,
+      quantity: qty,
+      stock: product.stock,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
+  }
 
   return (
     <div className="container grid gap-12 py-12 md:grid-cols-2 md:gap-16 md:py-20">
@@ -41,33 +58,28 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         </div>
         <p className="mt-6 text-sm leading-relaxed text-neutral-600">{product.description}</p>
 
-        <div className="mt-10 flex flex-wrap items-center gap-3">
+        {waitlist ? (
+          <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
+            Esgotado no momento — você pode entrar na <strong>fila de espera</strong> (sob encomenda).
+          </p>
+        ) : null}
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
           <input
             type="number"
             min={1}
-            max={product.stock}
+            max={maxQty}
             className="input max-w-20"
             value={qty}
-            onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value), product.stock)))}
+            onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value), maxQty)))}
           />
-          <button
-            className="btn btn-primary flex-1 sm:flex-none"
-            disabled={product.stock <= 0}
-            onClick={() =>
-              addItem({
-                productId: product.id,
-                slug: product.slug,
-                name: product.name,
-                price: product.price,
-                image,
-                quantity: qty,
-                stock: product.stock,
-              })
-            }
-          >
-            {product.stock > 0 ? "Adicionar ao carrinho" : "Indisponível"}
+          <button className="btn btn-primary flex-1 sm:flex-none" onClick={handleAdd}>
+            {waitlist ? "Entrar na fila de espera" : "Adicionar ao carrinho"}
           </button>
         </div>
+        {added ? (
+          <p className="mt-3 text-sm text-green-700">Adicionado ao carrinho.</p>
+        ) : null}
       </div>
     </div>
   );

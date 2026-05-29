@@ -1,6 +1,12 @@
 export function whatsappUrl(number: string, text?: string): string {
-  const digits = number.replace(/\D/g, "");
+  let digits = (number || "").replace(/\D/g, "").replace(/^0+/, "");
   if (!digits) return "#";
+  if (
+    !(digits.startsWith("55") && (digits.length === 12 || digits.length === 13)) &&
+    (digits.length === 10 || digits.length === 11)
+  ) {
+    digits = `55${digits}`;
+  }
   const base = `https://wa.me/${digits}`;
   if (!text?.trim()) return base;
   return `${base}?text=${encodeURIComponent(text)}`;

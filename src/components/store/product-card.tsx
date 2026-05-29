@@ -44,7 +44,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           ) : null}
         </div>
         {product.stock <= 0 ? (
-          <p className="pt-1 text-xs uppercase tracking-wider text-neutral-400">Esgotado</p>
+          <p className="pt-1 text-xs uppercase tracking-wider text-amber-700">
+            Sob encomenda · fila de espera
+          </p>
         ) : null}
       </div>
     </article>

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItem } from "@/types/cart";
+import { maxOrderQty } from "@/lib/utils";
 
 const STORAGE_KEY = "zwei-bruder-cart";
 
@@ -49,11 +50,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existing) {
         return prev.map((i) =>
           i.productId === item.productId
-            ? { ...i, quantity: Math.min(i.quantity + item.quantity, i.stock) }
+            ? { ...i, quantity: Math.min(i.quantity + item.quantity, maxOrderQty(i.stock)) }
             : i
         );
       }
-      return [...prev, item];
+      return [...prev, { ...item, quantity: Math.min(item.quantity, maxOrderQty(item.stock)) }];
     });
   };
 
@@ -65,7 +66,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) =>
       prev.map((i) =>
         i.productId === productId
-          ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) }
+          ? { ...i, quantity: Math.max(1, Math.min(quantity, maxOrderQty(i.stock))) }
           : i
       )
     );

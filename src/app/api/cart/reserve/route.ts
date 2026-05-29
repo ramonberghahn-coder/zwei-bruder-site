@@ -33,10 +33,13 @@ export async function POST(req: Request) {
     const itemRows = body.items.map((item) => {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new Error("Produto inválido");
-      if (item.quantity > product.stock) throw new Error(`Estoque insuficiente para ${product.name}`);
-      return { product, quantity: item.quantity };
+      const available = Math.max(0, product.stock);
+      const waitlistQty = Math.max(0, item.quantity - available);
+      const decrementQty = Math.min(item.quantity, available);
+      return { product, quantity: item.quantity, waitlistQty, decrementQty };
     });
 
+    const hasWaitlist = itemRows.some((row) => row.waitlistQty > 0);
     const subtotal = itemRows.reduce((acc, row) => acc + row.product.price * row.quantity, 0);
     const orderNumber = generateOrderNumber();
     const settings = await getSettings();
@@ -44,10 +47,12 @@ export async function POST(req: Request) {
 
     const order = await prisma.$transaction(async (tx) => {
       for (const row of itemRows) {
-        await tx.product.update({
-          where: { id: row.product.id },
-          data: { stock: { decrement: row.quantity } },
-        });
+        if (row.decrementQty > 0) {
+          await tx.product.update({
+            where: { id: row.product.id },
+            data: { stock: { decrement: row.decrementQty } },
+          });
+        }
       }
 
       return tx.order.create({
@@ -64,10 +69,12 @@ export async function POST(req: Request) {
               name: row.product.name,
               price: row.product.price,
               quantity: row.quantity,
+              waitlistQty: row.waitlistQty,
             }))
           ),
           subtotal,
           total: subtotal,
+          status: hasWaitlist ? "waitlist" : "reserved",
           pixPayload,
         },
       });
@@ -80,6 +87,7 @@ export async function POST(req: Request) {
       pixPayload,
       qrDataUrl,
       total: subtotal,
+      hasWaitlist,
     });
   } catch (error) {
     return NextResponse.json(

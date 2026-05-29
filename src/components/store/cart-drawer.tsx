@@ -1,17 +1,18 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCart } from "@/contexts/cart-context";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isWaitlist, maxOrderQty } from "@/lib/utils";
 
-type Step = "cart" | "details" | "payment";
+type Step = "cart" | "payment" | "done";
 
 type PaymentData = {
   orderNumber: string;
   pixPayload: string;
   qrDataUrl: string;
   total: number;
+  hasWaitlist: boolean;
 };
 
 export default function CartDrawer() {
@@ -23,6 +24,10 @@ export default function CartDrawer() {
   const [payment, setPayment] = useState<PaymentData | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const cartHasWaitlist = items.some((i) => isWaitlist(i.stock));
 
   function closeDrawer() {
     setOpen(false);
@@ -30,18 +35,23 @@ export default function CartDrawer() {
     setError(null);
     setPayment(null);
     setProofFile(null);
+    setWhatsappUrl(null);
   }
 
-  async function reserveOrder(formData: FormData) {
+  async function reserveOrder(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (items.length === 0) return;
+
+    const formData = new FormData(e.currentTarget);
     setLoading(true);
     setError(null);
     try {
       const payload = {
-        customerName: String(formData.get("customerName") || ""),
-        customerPhone: String(formData.get("customerPhone") || ""),
-        customerEmail: String(formData.get("customerEmail") || ""),
-        address: String(formData.get("address") || ""),
-        notes: String(formData.get("notes") || ""),
+        customerName: String(formData.get("customerName") || "").trim(),
+        customerPhone: String(formData.get("customerPhone") || "").trim(),
+        customerEmail: String(formData.get("customerEmail") || "").trim(),
+        address: String(formData.get("address") || "").trim(),
+        notes: String(formData.get("notes") || "").trim(),
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       };
 
@@ -60,20 +70,25 @@ export default function CartDrawer() {
         pixPayload: data.pixPayload,
         qrDataUrl: data.qrDataUrl,
         total: orderTotal,
+        hasWaitlist: Boolean(data.hasWaitlist),
       });
       setStep("payment");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao reservar pedido");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao reservar pedido");
     } finally {
       setLoading(false);
     }
   }
 
   async function sendWhatsApp() {
-    if (!payment || !proofFile) {
+    if (!payment) return;
+    if (!proofFile) {
       setError("Envie o comprovante de pagamento antes de continuar.");
       return;
     }
+
+    // Abre a janela JÁ no clique (evita bloqueio de pop-up após o await).
+    const preOpened = window.open("", "_blank");
 
     setSending(true);
     setError(null);
@@ -87,10 +102,17 @@ export default function CartDrawer() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Falha ao enviar comprovante.");
 
-      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
-      closeDrawer();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao abrir WhatsApp");
+      setWhatsappUrl(data.whatsappUrl);
+      setStep("done");
+
+      if (preOpened) {
+        preOpened.location.href = data.whatsappUrl;
+      } else {
+        window.location.href = data.whatsappUrl;
+      }
+    } catch (err) {
+      if (preOpened) preOpened.close();
+      setError(err instanceof Error ? err.message : "Erro ao abrir WhatsApp");
     } finally {
       setSending(false);
     }
@@ -124,8 +146,8 @@ export default function CartDrawer() {
             <div className="flex items-center justify-between border-b border-neutral-200 p-6">
               <h3 className="text-base font-medium">
                 {step === "cart" && "Carrinho"}
-                {step === "details" && "Seus dados"}
                 {step === "payment" && "Pagamento PIX"}
+                {step === "done" && "Pedido enviado"}
               </h3>
               <button type="button" className="text-sm text-neutral-500" onClick={closeDrawer}>
                 Fechar
@@ -134,42 +156,79 @@ export default function CartDrawer() {
 
             <div className="flex-1 overflow-y-auto p-6">
               {step === "cart" && (
-                <div className="space-y-4">
-                  {items.length === 0 && <p className="text-sm text-neutral-500">Carrinho vazio.</p>}
-                  {items.map((item) => (
-                    <div key={item.productId} className="border-b border-neutral-100 pb-4">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-sm text-neutral-500">{formatCurrency(item.price)}</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          max={item.stock}
-                          value={item.quantity}
-                          onChange={(e) => updateQty(item.productId, Number(e.target.value))}
-                          className="input max-w-20"
-                        />
-                        <button
-                          type="button"
-                          className="text-sm text-neutral-500 hover:text-black"
-                          onClick={() => removeItem(item.productId)}
-                        >
-                          Remover
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    {items.length === 0 && (
+                      <p className="text-sm text-neutral-500">Seu carrinho está vazio.</p>
+                    )}
+                    {items.map((item) => {
+                      const waitlist = isWaitlist(item.stock);
+                      return (
+                        <div key={item.productId} className="border-b border-neutral-100 pb-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-medium">{item.name}</p>
+                              <p className="text-sm text-neutral-500">{formatCurrency(item.price)}</p>
+                              {waitlist ? (
+                                <span className="mt-1 inline-block bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800">
+                                  Fila de espera (sob encomenda)
+                                </span>
+                              ) : null}
+                            </div>
+                            <button
+                              type="button"
+                              className="text-xs text-neutral-500 hover:text-black"
+                              onClick={() => removeItem(item.productId)}
+                            >
+                              Remover
+                            </button>
+                          </div>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-xs text-neutral-500">Qtd.</span>
+                            <input
+                              type="number"
+                              min={1}
+                              max={maxOrderQty(item.stock)}
+                              value={item.quantity}
+                              onChange={(e) => updateQty(item.productId, Number(e.target.value))}
+                              className="input max-w-20"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-              {step === "details" && (
-                <form id="checkout-form" action={reserveOrder} className="space-y-3">
-                  <input name="customerName" placeholder="Nome completo" className="input" required />
-                  <input name="customerPhone" placeholder="WhatsApp (com DDD)" className="input" required />
-                  <input name="customerEmail" placeholder="Email (opcional)" className="input" />
-                  <input name="address" placeholder="Endereço (opcional)" className="input" />
-                  <textarea name="notes" placeholder="Observações" className="textarea" rows={3} />
-                </form>
+                  {items.length > 0 && (
+                    <form id="checkout-form" ref={formRef} onSubmit={reserveOrder} className="space-y-3">
+                      <p className="text-sm font-medium">Seus dados</p>
+                      <div>
+                        <label className="text-xs text-neutral-500">Nome completo *</label>
+                        <input name="customerName" className="input mt-1" required minLength={2} />
+                      </div>
+                      <div>
+                        <label className="text-xs text-neutral-500">WhatsApp com DDD *</label>
+                        <input
+                          name="customerPhone"
+                          className="input mt-1"
+                          required
+                          inputMode="tel"
+                          placeholder="(11) 99999-9999"
+                        />
+                      </div>
+                      <details className="text-sm text-neutral-600">
+                        <summary className="cursor-pointer select-none text-xs text-neutral-500">
+                          Adicionar e-mail, endereço ou observações (opcional)
+                        </summary>
+                        <div className="mt-3 space-y-3">
+                          <input name="customerEmail" placeholder="E-mail" className="input" />
+                          <input name="address" placeholder="Endereço" className="input" />
+                          <textarea name="notes" placeholder="Observações" className="textarea" rows={2} />
+                        </div>
+                      </details>
+                    </form>
+                  )}
+                </div>
               )}
 
               {step === "payment" && payment && (
@@ -177,6 +236,11 @@ export default function CartDrawer() {
                   <p className="text-sm text-neutral-600">
                     Pedido <strong>{payment.orderNumber}</strong> — {formatCurrency(payment.total)}
                   </p>
+                  {payment.hasWaitlist ? (
+                    <p className="border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                      Seu pedido tem itens em <strong>fila de espera</strong>. Acertamos o prazo no WhatsApp.
+                    </p>
+                  ) : null}
                   {payment.qrDataUrl ? (
                     <div className="flex justify-center border border-neutral-200 p-4">
                       <Image src={payment.qrDataUrl} alt="QR Code PIX" width={220} height={220} unoptimized />
@@ -198,9 +262,30 @@ export default function CartDrawer() {
                       onChange={(e) => setProofFile(e.target.files?.[0] || null)}
                     />
                     <p className="mt-1 text-xs text-neutral-500">
-                      Após enviar, o WhatsApp abrirá com o pedido e o link do comprovante.
+                      Após enviar, o WhatsApp abre com o resumo do pedido e o link do comprovante.
                     </p>
                   </div>
+                </div>
+              )}
+
+              {step === "done" && (
+                <div className="space-y-5 text-center">
+                  <p className="text-sm text-neutral-600">
+                    Pedido <strong>{payment?.orderNumber}</strong> registrado!
+                  </p>
+                  <p className="text-sm text-neutral-600">
+                    Se o WhatsApp não abriu automaticamente, toque no botão abaixo:
+                  </p>
+                  {whatsappUrl ? (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary w-full"
+                    >
+                      Abrir conversa no WhatsApp
+                    </a>
+                  ) : null}
                 </div>
               )}
 
@@ -210,27 +295,24 @@ export default function CartDrawer() {
             <div className="border-t border-neutral-200 p-6">
               {step === "cart" && (
                 <>
-                  <p className="text-sm font-medium">Total {formatCurrency(total)}</p>
+                  <div className="mb-4 flex items-center justify-between text-sm">
+                    <span className="text-neutral-500">Total</span>
+                    <span className="font-medium">{formatCurrency(total)}</span>
+                  </div>
+                  {cartHasWaitlist ? (
+                    <p className="mb-3 text-xs text-amber-800">
+                      Há itens em fila de espera no carrinho.
+                    </p>
+                  ) : null}
                   <button
-                    type="button"
-                    className="btn btn-primary mt-4 w-full"
-                    disabled={items.length === 0}
-                    onClick={() => setStep("details")}
+                    type="submit"
+                    form="checkout-form"
+                    className="btn btn-primary w-full"
+                    disabled={loading || items.length === 0}
                   >
-                    Finalizar pedido
+                    {loading ? "Gerando PIX..." : "Finalizar e gerar PIX"}
                   </button>
                 </>
-              )}
-
-              {step === "details" && (
-                <button
-                  type="submit"
-                  form="checkout-form"
-                  className="btn btn-primary w-full"
-                  disabled={loading || items.length === 0}
-                >
-                  {loading ? "Gerando PIX..." : "Gerar QR Code PIX"}
-                </button>
               )}
 
               {step === "payment" && (
@@ -240,7 +322,13 @@ export default function CartDrawer() {
                   disabled={sending || !proofFile}
                   onClick={sendWhatsApp}
                 >
-                  {sending ? "Abrindo WhatsApp..." : "Enviar pedido no WhatsApp"}
+                  {sending ? "Enviando..." : "Enviar pedido no WhatsApp"}
+                </button>
+              )}
+
+              {step === "done" && (
+                <button type="button" className="btn btn-secondary w-full" onClick={closeDrawer}>
+                  Concluir
                 </button>
               )}
             </div>
