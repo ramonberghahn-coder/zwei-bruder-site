@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import CartDrawer from "./cart-drawer";
+import CartLink from "./cart-link";
 import type { StoreSettings } from "@/lib/settings";
 
 export default function Header({ settings }: { settings: StoreSettings }) {
@@ -24,7 +24,7 @@ export default function Header({ settings }: { settings: StoreSettings }) {
             <Link href="/#contato" className="nav-link hidden md:inline">
               Contato
             </Link>
-            <CartDrawer />
+            <CartLink />
           </div>
         </div>
       </div>
