@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatCurrency, productImageUrl } from "@/lib/utils";
 import { getWhatsAppWebUrl } from "@/lib/whatsapp";
@@ -20,10 +21,16 @@ type ProductCardProps = {
 export default function ProductCard({ product, whatsappNumber }: ProductCardProps) {
   const image = productImageUrl(product.images[0]);
   const hasCompare = product.compareAt != null && product.compareAt > product.price;
+  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || "");
+  useEffect(() => {
+    if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
+  }, [origin]);
+  const productLink = origin ? `${origin}/produto/${product.slug}` : "";
   const restockUrl = whatsappNumber
     ? getWhatsAppWebUrl(
         whatsappNumber,
-        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.`
+        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.` +
+          (productLink ? `\n${productLink}` : "")
       )
     : null;
 

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
 import { formatCurrency, isWaitlist, maxOrderQty, productImageUrl } from "@/lib/utils";
@@ -26,10 +26,16 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   const image = productImageUrl(product.images[0]);
   const waitlist = isWaitlist(product.stock);
   const maxQty = maxOrderQty(product.stock);
+  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || "");
+  useEffect(() => {
+    if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
+  }, [origin]);
+  const productLink = origin ? `${origin}/produto/${product.slug}` : "";
   const restockUrl = whatsappNumber
     ? getWhatsAppWebUrl(
         whatsappNumber,
-        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.`
+        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.` +
+          (productLink ? `\n${productLink}` : "")
       )
     : null;
 
