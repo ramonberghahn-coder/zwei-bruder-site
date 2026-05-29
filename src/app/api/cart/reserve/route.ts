@@ -11,6 +11,9 @@ const reserveSchema = z.object({
   customerEmail: z.string().optional(),
   address: z.string().optional(),
   notes: z.string().optional(),
+  shippingCost: z.coerce.number().min(0).optional(),
+  shippingService: z.string().optional(),
+  shippingCep: z.string().optional(),
   items: z.array(
     z.object({
       productId: z.string(),
@@ -41,9 +44,11 @@ export async function POST(req: Request) {
 
     const hasWaitlist = itemRows.some((row) => row.waitlistQty > 0);
     const subtotal = itemRows.reduce((acc, row) => acc + row.product.price * row.quantity, 0);
+    const shippingCost = Math.max(0, body.shippingCost ?? 0);
+    const total = subtotal + shippingCost;
     const orderNumber = generateOrderNumber();
     const settings = await getSettings();
-    const pixPayload = buildPixPayload(settings, subtotal, orderNumber);
+    const pixPayload = buildPixPayload(settings, total, orderNumber);
 
     const order = await prisma.$transaction(async (tx) => {
       for (const row of itemRows) {
@@ -73,7 +78,10 @@ export async function POST(req: Request) {
             }))
           ),
           subtotal,
-          total: subtotal,
+          shippingCost,
+          shippingService: body.shippingService,
+          shippingCep: body.shippingCep,
+          total,
           status: hasWaitlist ? "waitlist" : "reserved",
           pixPayload,
         },
@@ -86,7 +94,9 @@ export async function POST(req: Request) {
       orderNumber: order.orderNumber,
       pixPayload,
       qrDataUrl,
-      total: subtotal,
+      total,
+      subtotal,
+      shippingCost,
       hasWaitlist,
     });
   } catch (error) {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/contexts/cart-context";
 import { formatCurrency, isWaitlist, maxOrderQty } from "@/lib/utils";
+import type { ShippingOption } from "@/lib/shipping";
 
 type Stage = "cart" | "payment" | "done";
 
@@ -12,6 +13,8 @@ type PaymentData = {
   orderNumber: string;
   pixPayload: string;
   qrDataUrl: string;
+  subtotal: number;
+  shippingCost: number;
   total: number;
   hasWaitlist: boolean;
 };
@@ -26,7 +29,47 @@ export default function CartPage() {
   const [sending, setSending] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
+  const [cep, setCep] = useState("");
+  const [shipLoading, setShipLoading] = useState(false);
+  const [shipError, setShipError] = useState<string | null>(null);
+  const [shipOptions, setShipOptions] = useState<ShippingOption[]>([]);
+  const [shipDest, setShipDest] = useState<{ uf: string; city: string } | null>(null);
+  const [selectedShip, setSelectedShip] = useState<ShippingOption | null>(null);
+
   const cartHasWaitlist = items.some((i) => isWaitlist(i.stock));
+  const shippingCost = selectedShip?.price ?? 0;
+  const displayTotal = payment ? payment.total : total + shippingCost;
+
+  async function calcularFrete() {
+    setShipError(null);
+    setSelectedShip(null);
+    setShipOptions([]);
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length !== 8) {
+      setShipError("Digite um CEP com 8 dígitos.");
+      return;
+    }
+    setShipLoading(true);
+    try {
+      const res = await fetch("/api/shipping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cep: digits,
+          items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao calcular frete");
+      setShipOptions(data.options ?? []);
+      setShipDest({ uf: data.uf, city: data.city });
+      setSelectedShip(data.options?.[0] ?? null);
+    } catch (err) {
+      setShipError(err instanceof Error ? err.message : "Erro ao calcular frete");
+    } finally {
+      setShipLoading(false);
+    }
+  }
 
   async function reserveOrder(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,6 +85,11 @@ export default function CartPage() {
         customerEmail: String(formData.get("customerEmail") || "").trim(),
         address: String(formData.get("address") || "").trim(),
         notes: String(formData.get("notes") || "").trim(),
+        shippingCost: selectedShip?.price ?? 0,
+        shippingService: selectedShip
+          ? `${selectedShip.service} • ${selectedShip.days} dia(s) úteis`
+          : undefined,
+        shippingCep: shipDest ? cep.replace(/\D/g, "") : undefined,
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       };
 
@@ -59,6 +107,8 @@ export default function CartPage() {
         orderNumber: data.orderNumber,
         pixPayload: data.pixPayload,
         qrDataUrl: data.qrDataUrl,
+        subtotal: data.subtotal ?? orderTotal,
+        shippingCost: data.shippingCost ?? 0,
         total: orderTotal,
         hasWaitlist: Boolean(data.hasWaitlist),
       });
@@ -287,17 +337,96 @@ export default function CartPage() {
             <dl className="mt-6 space-y-3 text-sm">
               <div className="flex justify-between">
                 <dt className="text-neutral-600">Subtotal</dt>
-                <dd>{formatCurrency(payment ? payment.total : total)}</dd>
+                <dd>{formatCurrency(payment ? payment.subtotal : total)}</dd>
               </div>
               <div className="flex justify-between text-neutral-600">
                 <dt>Frete</dt>
-                <dd>A combinar pelo WhatsApp</dd>
+                <dd>
+                  {payment
+                    ? payment.shippingCost > 0
+                      ? formatCurrency(payment.shippingCost)
+                      : "A combinar"
+                    : selectedShip
+                      ? formatCurrency(selectedShip.price)
+                      : "Calcular abaixo"}
+                </dd>
               </div>
               <div className="flex justify-between border-t border-neutral-200 pt-3 text-base font-medium">
                 <dt>Total</dt>
-                <dd>{formatCurrency(payment ? payment.total : total)}</dd>
+                <dd>{formatCurrency(displayTotal)}</dd>
               </div>
             </dl>
+
+            {stage === "cart" && (
+              <div className="mt-6 border-t border-neutral-200 pt-5">
+                <p className="text-sm font-medium">Calcular frete</p>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    inputMode="numeric"
+                    placeholder="CEP (só números)"
+                    className="input"
+                    value={cep}
+                    onChange={(e) => setCep(e.target.value)}
+                    maxLength={9}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary shrink-0"
+                    onClick={calcularFrete}
+                    disabled={shipLoading || items.length === 0}
+                  >
+                    {shipLoading ? "..." : "Calcular"}
+                  </button>
+                </div>
+                <a
+                  href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block text-xs text-neutral-500 hover:text-black"
+                >
+                  Não sei meu CEP
+                </a>
+
+                {shipError ? <p className="mt-2 text-sm text-red-600">{shipError}</p> : null}
+
+                {shipDest && shipOptions.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs text-neutral-500">
+                      Entrega em {shipDest.city} - {shipDest.uf}
+                    </p>
+                    {shipOptions.map((opt) => (
+                      <label
+                        key={opt.service}
+                        className={`flex cursor-pointer items-center justify-between gap-2 rounded-md border p-2.5 text-sm ${
+                          selectedShip?.service === opt.service
+                            ? "border-[color:var(--accent)] bg-[#faf6f2]"
+                            : "border-neutral-200"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="ship"
+                            checked={selectedShip?.service === opt.service}
+                            onChange={() => setSelectedShip(opt)}
+                          />
+                          <span>
+                            {opt.label}
+                            <span className="block text-xs text-neutral-500">
+                              até {opt.days} dia(s) úteis
+                            </span>
+                          </span>
+                        </span>
+                        <span className="font-medium">{formatCurrency(opt.price)}</span>
+                      </label>
+                    ))}
+                    <p className="text-[11px] text-neutral-500">
+                      Estimativa. O valor final é confirmado no WhatsApp.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
 
             {cartHasWaitlist && stage === "cart" ? (
               <p className="mt-4 text-xs text-amber-800">

@@ -17,6 +17,7 @@ model Product {
   category    String
   images      String   @default("[]")
   stock       Int      @default(0)
+  weight      Int      @default(500)
   featured    Boolean  @default(false)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -33,6 +34,9 @@ model Order {
   notes           String?
   items           String
   subtotal        Float
+  shippingCost    Float    @default(0)
+  shippingService String?
+  shippingCep     String?
   total           Float
   status          String   @default("reserved")
   paymentProofUrl String?

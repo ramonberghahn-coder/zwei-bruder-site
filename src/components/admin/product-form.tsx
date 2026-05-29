@@ -10,6 +10,7 @@ type ProductPayload = {
   price: number;
   category: string;
   stock: number;
+  weight: number;
   featured: boolean;
   active: boolean;
   images: string;
@@ -111,6 +112,7 @@ export default function ProductForm({
       price: Number(formData.get("price") || 0),
       category: String(formData.get("category") || "").trim(),
       stock: Number(formData.get("stock") || 0),
+      weight: Number(formData.get("weight") || 0),
       featured: formData.get("featured") === "on",
       active: formData.get("active") === "on",
       images: images.join("\n"),
@@ -150,6 +152,22 @@ export default function ProductForm({
       <div className="grid gap-3 md:grid-cols-2">
         <input name="price" type="number" step="0.01" min="0.01" className="input" placeholder="Preço" defaultValue={initial?.price} required />
         <input name="stock" type="number" min="0" className="input" placeholder="Estoque" defaultValue={initial?.stock ?? 0} required />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Peso para frete (gramas)</label>
+        <input
+          name="weight"
+          type="number"
+          min="0"
+          step="1"
+          className="input mt-1"
+          placeholder="Ex.: 500"
+          defaultValue={initial?.weight ?? 500}
+          required
+        />
+        <p className="mt-1 text-xs text-neutral-500">
+          Usado no cálculo de frete por CEP. Inclua a embalagem (ex.: faca ~500g).
+        </p>
       </div>
       <input name="category" className="input" placeholder="Categoria" defaultValue={initial?.category} required />
 
