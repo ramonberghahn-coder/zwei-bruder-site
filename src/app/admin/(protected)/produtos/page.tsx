@@ -1,46 +1,79 @@
 import Link from "next/link";
+import DeleteProductButton from "@/components/admin/delete-product-button";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, parseImages, productImageUrl } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+  let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let loadError = false;
+  try {
+    products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+  } catch {
+    loadError = true;
+  }
 
   return (
     <div className="container py-10">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-medium">Produtos</h1>
-        </div>
+        <h1 className="text-2xl font-medium">Produtos</h1>
         <Link className="btn btn-primary" href="/admin/produtos/novo">
           Novo produto
         </Link>
       </div>
-      <div className="mt-8 overflow-auto rounded-xl border bg-white">
-        <table className="min-w-full text-sm">
-          <thead className="bg-neutral-50 text-left uppercase tracking-wider text-neutral-600">
-            <tr>
-              <th className="px-4 py-3">Nome</th>
-              <th className="px-4 py-3">Preço</th>
-              <th className="px-4 py-3">Estoque</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td className="px-4 py-3">{p.name}</td>
-                <td className="px-4 py-3">{formatCurrency(p.price)}</td>
-                <td className="px-4 py-3">{p.stock}</td>
-                <td className="px-4 py-3">
-                  <Link className="text-blue-600" href={`/admin/produtos/${p.id}/editar`}>
-                    Editar
-                  </Link>
-                </td>
+
+      {loadError ? (
+        <p className="mt-8 text-sm text-red-600">
+          Não foi possível carregar os produtos. Verifique a conexão com o banco em /api/health.
+        </p>
+      ) : products.length === 0 ? (
+        <p className="mt-8 text-sm text-neutral-500">Nenhum produto cadastrado ainda.</p>
+      ) : (
+        <div className="mt-8 overflow-auto border border-neutral-200 bg-white">
+          <table className="min-w-full text-sm">
+            <thead className="bg-neutral-50 text-left uppercase tracking-wider text-neutral-600">
+              <tr>
+                <th className="px-4 py-3">Imagem</th>
+                <th className="px-4 py-3">Nome</th>
+                <th className="px-4 py-3">Preço</th>
+                <th className="px-4 py-3">Estoque</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {products.map((p) => {
+                const image = productImageUrl(parseImages(p.images)[0]);
+                return (
+                  <tr key={p.id} className="border-t border-neutral-200">
+                    <td className="px-4 py-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={image} alt={p.name} className="h-12 w-12 object-cover" />
+                    </td>
+                    <td className="px-4 py-3">{p.name}</td>
+                    <td className="px-4 py-3">{formatCurrency(p.price)}</td>
+                    <td className="px-4 py-3">{p.stock}</td>
+                    <td className="px-4 py-3">
+                      <span className={p.active ? "text-green-700" : "text-neutral-400"}>
+                        {p.active ? "Ativo" : "Inativo"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-4">
+                        <Link className="text-blue-600 hover:underline" href={`/admin/produtos/${p.id}/editar`}>
+                          Editar
+                        </Link>
+                        <DeleteProductButton id={p.id} name={p.name} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
