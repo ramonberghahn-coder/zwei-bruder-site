@@ -1,5 +1,4 @@
-﻿import Link from "next/link";
-import SocialLinks from "./social-links";
+﻿import SocialLinks from "./social-links";
 import type { StoreSettings } from "@/lib/settings";
 import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/social";
 
@@ -9,8 +8,8 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
   return (
     <footer id="contato" className="mt-20 border-t border-neutral-200 bg-neutral-50">
       <div className="container py-14 md:py-16">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2">
+        <div className="grid gap-12 md:grid-cols-2">
+          <div>
             <p className="font-display text-3xl font-medium">{settings.storeName}</p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600">
               {settings.aboutText ||
@@ -18,25 +17,9 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
             </p>
           </div>
 
-          <div>
-            <p className="footer-heading">Navegação</p>
-            <ul className="mt-4 space-y-2.5 text-sm text-neutral-600">
-              <li>
-                <Link href="/#produtos" className="hover:text-black">
-                  Produtos
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/login" className="hover:text-black">
-                  Área do lojista
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
+          <div className="md:text-right">
             <p className="footer-heading">Encontre-nos</p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-600">
+            <div className="mt-4 space-y-3 text-sm text-neutral-600 md:flex md:flex-col md:items-end">
               <SocialLinks
                 instagram={settings.instagram}
                 whatsappNumber={settings.whatsappNumber}

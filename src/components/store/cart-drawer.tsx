@@ -138,9 +138,9 @@ export default function CartDrawer() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/20" onClick={closeDrawer}>
+        <div className="drawer-overlay fixed inset-0 z-50 bg-black/30" onClick={closeDrawer}>
           <aside
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-neutral-200 bg-white"
+            className="drawer-panel absolute right-0 top-0 flex h-full w-full max-w-[26rem] flex-col bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-neutral-200 p-6">
@@ -164,35 +164,49 @@ export default function CartDrawer() {
                     {items.map((item) => {
                       const waitlist = isWaitlist(item.stock);
                       return (
-                        <div key={item.productId} className="border-b border-neutral-100 pb-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-medium">{item.name}</p>
-                              <p className="text-sm text-neutral-500">{formatCurrency(item.price)}</p>
-                              {waitlist ? (
-                                <span className="mt-1 inline-block bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800">
-                                  Fila de espera (sob encomenda)
-                                </span>
-                              ) : null}
-                            </div>
-                            <button
-                              type="button"
-                              className="text-xs text-neutral-500 hover:text-black"
-                              onClick={() => removeItem(item.productId)}
-                            >
-                              Remover
-                            </button>
+                        <div key={item.productId} className="flex gap-3 border-b border-neutral-100 pb-4">
+                          <div className="h-20 w-16 shrink-0 overflow-hidden bg-neutral-100">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                           </div>
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="text-xs text-neutral-500">Qtd.</span>
-                            <input
-                              type="number"
-                              min={1}
-                              max={maxOrderQty(item.stock)}
-                              value={item.quantity}
-                              onChange={(e) => updateQty(item.productId, Number(e.target.value))}
-                              className="input max-w-20"
-                            />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-medium leading-snug">{item.name}</p>
+                              <button
+                                type="button"
+                                className="shrink-0 text-xs text-neutral-400 hover:text-black"
+                                onClick={() => removeItem(item.productId)}
+                                aria-label="Remover item"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            <p className="mt-0.5 text-sm text-neutral-500">{formatCurrency(item.price)}</p>
+                            {waitlist ? (
+                              <span className="mt-1 inline-block bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800">
+                                Fila de espera
+                              </span>
+                            ) : null}
+                            <div className="mt-2 inline-flex items-center border border-neutral-300">
+                              <button
+                                type="button"
+                                className="px-2.5 py-1 text-sm hover:bg-neutral-100"
+                                onClick={() => updateQty(item.productId, item.quantity - 1)}
+                                aria-label="Diminuir"
+                              >
+                                −
+                              </button>
+                              <span className="min-w-8 text-center text-sm">{item.quantity}</span>
+                              <button
+                                type="button"
+                                className="px-2.5 py-1 text-sm hover:bg-neutral-100 disabled:opacity-30"
+                                onClick={() => updateQty(item.productId, item.quantity + 1)}
+                                disabled={item.quantity >= maxOrderQty(item.stock)}
+                                aria-label="Aumentar"
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
