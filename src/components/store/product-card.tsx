@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatCurrency, productImageUrl } from "@/lib/utils";
+import { getWhatsAppWebUrl } from "@/lib/whatsapp";
 
 type ProductCardProps = {
   product: {
@@ -13,11 +14,18 @@ type ProductCardProps = {
     stock: number;
     images: string[];
   };
+  whatsappNumber?: string;
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, whatsappNumber }: ProductCardProps) {
   const image = productImageUrl(product.images[0]);
   const hasCompare = product.compareAt != null && product.compareAt > product.price;
+  const restockUrl = whatsappNumber
+    ? getWhatsAppWebUrl(
+        whatsappNumber,
+        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.`
+      )
+    : null;
 
   return (
     <article className="group text-center">
@@ -38,9 +46,20 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
         <div className="space-y-0.5">
           {product.stock <= 0 ? (
-            <p className="text-sm font-medium uppercase tracking-wider text-amber-700">
-              Sob encomenda
-            </p>
+            restockUrl ? (
+              <a
+                href={restockUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium uppercase tracking-wider text-amber-700 underline-offset-4 hover:underline"
+              >
+                Sob encomenda
+              </a>
+            ) : (
+              <p className="text-sm font-medium uppercase tracking-wider text-amber-700">
+                Sob encomenda
+              </p>
+            )
           ) : (
             <>
               <p className="price-label">Preço normal</p>

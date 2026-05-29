@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/store/product-details";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { parseImages, productImageUrl } from "@/lib/utils";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -15,8 +16,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   if (!product || !product.active) return notFound();
 
+  const settings = await getSettings();
+
   return (
     <ProductDetails
+      whatsappNumber={settings.whatsappNumber}
       product={{
         id: product.id,
         slug: product.slug,

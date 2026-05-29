@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
 import { formatCurrency, isWaitlist, maxOrderQty, productImageUrl } from "@/lib/utils";
+import { getWhatsAppWebUrl } from "@/lib/whatsapp";
 
 type ProductDetailsProps = {
   product: {
@@ -15,15 +16,22 @@ type ProductDetailsProps = {
     stock: number;
     images: string[];
   };
+  whatsappNumber?: string;
 };
 
-export default function ProductDetails({ product }: ProductDetailsProps) {
+export default function ProductDetails({ product, whatsappNumber }: ProductDetailsProps) {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const image = productImageUrl(product.images[0]);
   const waitlist = isWaitlist(product.stock);
   const maxQty = maxOrderQty(product.stock);
+  const restockUrl = whatsappNumber
+    ? getWhatsAppWebUrl(
+        whatsappNumber,
+        `Olá! Gostaria de informações sobre a reposição deste produto: ${product.name}.`
+      )
+    : null;
 
   function handleAdd() {
     addItem({
@@ -56,34 +64,52 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           {waitlist ? (
             <p className="text-sm font-medium uppercase tracking-wider text-amber-700">Sob encomenda</p>
           ) : (
-            <p className="price-label">Preço normal</p>
+            <>
+              <p className="price-label">Preço normal</p>
+              <p className="mt-1 text-xl">{formatCurrency(product.price)}</p>
+            </>
           )}
-          <p className="mt-1 text-xl">{formatCurrency(product.price)}</p>
         </div>
         <p className="mt-6 text-sm leading-relaxed text-neutral-600">{product.description}</p>
 
         {waitlist ? (
-          <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
-            Esgotado no momento — disponível <strong>sob encomenda</strong>. Combinamos o prazo no WhatsApp.
-          </p>
-        ) : null}
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <input
-            type="number"
-            min={1}
-            max={maxQty}
-            className="input max-w-20"
-            value={qty}
-            onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value), maxQty)))}
-          />
-          <button className="btn btn-primary flex-1 sm:flex-none" onClick={handleAdd}>
-            {waitlist ? "Comprar sob encomenda" : "Adicionar ao carrinho"}
-          </button>
-        </div>
-        {added ? (
-          <p className="mt-3 text-sm text-green-700">Adicionado ao carrinho.</p>
-        ) : null}
+          <>
+            <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
+              Esgotado no momento — disponível <strong>sob encomenda</strong>. Combinamos o prazo no WhatsApp.
+            </p>
+            <div className="mt-8">
+              {restockUrl ? (
+                <a
+                  href={restockUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary w-full sm:w-auto"
+                >
+                  Falar no WhatsApp sobre reposição
+                </a>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <input
+                type="number"
+                min={1}
+                max={maxQty}
+                className="input max-w-20"
+                value={qty}
+                onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value), maxQty)))}
+              />
+              <button className="btn btn-primary flex-1 sm:flex-none" onClick={handleAdd}>
+                Adicionar ao carrinho
+              </button>
+            </div>
+            {added ? (
+              <p className="mt-3 text-sm text-green-700">Adicionado ao carrinho.</p>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   );

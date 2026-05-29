@@ -1,5 +1,6 @@
 import ProductCard from "@/components/store/product-card";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { parseImages, productImageUrl } from "@/lib/utils";
 
 export default async function HomePage() {
@@ -13,6 +14,8 @@ export default async function HomePage() {
     products = [];
   }
 
+  const settings = await getSettings();
+
   return (
     <section id="produtos" className="container py-12 md:py-16">
       {products.length === 0 ? (
@@ -22,6 +25,7 @@ export default async function HomePage() {
           {products.map((p) => (
             <ProductCard
               key={p.id}
+              whatsappNumber={settings.whatsappNumber}
               product={{
                 id: p.id,
                 slug: p.slug,
