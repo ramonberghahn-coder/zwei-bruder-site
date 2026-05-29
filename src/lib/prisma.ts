@@ -11,6 +11,9 @@ function createPrismaClient(): PrismaClient {
 
   if (url && usesNeonDatabase()) {
     neonConfig.webSocketConstructor = ws;
+    // Roteia queries simples por HTTP fetch em vez de WebSocket: evita
+    // "Connection terminated unexpectedly" no host -pooler (Render/serverless).
+    neonConfig.poolQueryViaFetch = true;
     const adapter = new PrismaNeon({ connectionString: url });
     return new PrismaClient({
       adapter,
