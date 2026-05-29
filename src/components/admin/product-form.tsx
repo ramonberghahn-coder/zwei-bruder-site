@@ -53,6 +53,26 @@ export default function ProductForm({
     setImages((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function makePrimary(index: number) {
+    setImages((prev) => {
+      if (index <= 0 || index >= prev.length) return prev;
+      const next = [...prev];
+      const [item] = next.splice(index, 1);
+      next.unshift(item);
+      return next;
+    });
+  }
+
+  function moveImage(index: number, direction: -1 | 1) {
+    setImages((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
   async function handleUploadImage(file: File | null) {
     if (!file) return;
     setUploading(true);
@@ -137,24 +157,70 @@ export default function ProductForm({
         <p className="text-sm font-medium">Imagens do produto</p>
 
         {images.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {images.map((img, index) => (
-              <div key={`${img.slice(0, 24)}-${index}`} className="relative border border-neutral-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img} alt={`Imagem ${index + 1}`} className="aspect-square w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute right-1 top-1 bg-black/70 px-2 py-0.5 text-xs text-white hover:bg-black"
-                >
-                  Remover
-                </button>
-                <span className="block truncate px-1 py-0.5 text-[10px] text-neutral-500">
-                  {imageLabel(img)}
-                </span>
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {images.map((img, index) => (
+                <div key={`${img.slice(0, 24)}-${index}`} className="relative border border-neutral-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt={`Imagem ${index + 1}`} className="aspect-square w-full object-cover" />
+
+                  {index === 0 ? (
+                    <span className="absolute left-1 top-1 bg-green-700 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
+                      Principal
+                    </span>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute right-1 top-1 bg-black/70 px-2 py-0.5 text-xs text-white hover:bg-black"
+                  >
+                    Remover
+                  </button>
+
+                  <div className="flex items-center justify-between gap-1 px-1 py-1">
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, -1)}
+                        disabled={index === 0}
+                        className="border border-neutral-300 px-1.5 text-xs disabled:opacity-30"
+                        aria-label="Mover para a esquerda"
+                      >
+                        ←
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 1)}
+                        disabled={index === images.length - 1}
+                        className="border border-neutral-300 px-1.5 text-xs disabled:opacity-30"
+                        aria-label="Mover para a direita"
+                      >
+                        →
+                      </button>
+                    </div>
+                    {index !== 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => makePrimary(index)}
+                        className="text-[10px] text-blue-600 hover:underline"
+                      >
+                        Tornar principal
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <span className="block truncate px-1 pb-1 text-[10px] text-neutral-500">
+                    {imageLabel(img)}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-neutral-500">
+              A primeira imagem (Principal) é a capa exibida na loja. Use as setas ou
+              &quot;Tornar principal&quot; para reordenar.
+            </p>
+          </>
         ) : (
           <p className="text-xs text-neutral-500">Nenhuma imagem adicionada ainda.</p>
         )}
