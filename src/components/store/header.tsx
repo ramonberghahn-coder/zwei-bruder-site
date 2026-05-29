@@ -11,9 +11,6 @@ export default function Header({ settings }: { settings: StoreSettings }) {
             <Link href="/#produtos" className="nav-link">
               Produtos
             </Link>
-            <Link href="/#sobre" className="nav-link hidden sm:inline">
-              Sobre
-            </Link>
           </nav>
 
           <Link

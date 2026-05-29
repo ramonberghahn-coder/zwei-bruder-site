@@ -27,11 +27,6 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
                 </Link>
               </li>
               <li>
-                <Link href="/#sobre" className="hover:text-black">
-                  Sobre a marca
-                </Link>
-              </li>
-              <li>
                 <Link href="/admin/login" className="hover:text-black">
                   Área do lojista
                 </Link>
