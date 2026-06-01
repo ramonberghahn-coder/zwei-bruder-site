@@ -23,9 +23,41 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const image = productImageUrl(product.images[0]);
+  const images = product.images.length ? product.images : [""];
+  const [active, setActive] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const image = productImageUrl(images[0]);
+  const mainImage = productImageUrl(images[active]);
   const waitlist = isWaitlist(product.stock);
   const maxQty = maxOrderQty(product.stock);
+
+  function closeLightbox() {
+    setLightboxOpen(false);
+    setZoomed(false);
+  }
+
+  function handleZoomMove(e: React.MouseEvent<HTMLImageElement>) {
+    if (!zoomed) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPos({ x, y });
+  }
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeLightbox();
+    }
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightboxOpen]);
   const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || "");
   useEffect(() => {
     if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
@@ -55,9 +87,45 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
 
   return (
     <div className="container grid gap-12 py-12 md:grid-cols-2 md:gap-16 md:py-20">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[10px] bg-[#f7f4f0]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-[10px] bg-[#f7f4f0]"
+          aria-label="Ampliar imagem"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={mainImage}
+            alt={product.name}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+          <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+            Ampliar
+          </span>
+        </button>
+        {images.length > 1 ? (
+          <div className="flex flex-wrap gap-2">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActive(i)}
+                className={`relative h-16 w-16 overflow-hidden rounded-md bg-[#f7f4f0] ring-2 transition ${
+                  i === active ? "ring-neutral-900" : "ring-transparent hover:ring-neutral-300"
+                }`}
+                aria-label={`Ver imagem ${i + 1}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={productImageUrl(img)}
+                  alt={`${product.name} ${i + 1}`}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
       <div className="flex flex-col justify-center md:py-4">
         <Link href="/#produtos" className="eyebrow hover:opacity-60">
@@ -117,6 +185,68 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
           </>
         )}
       </div>
+
+      {lightboxOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            onClick={closeLightbox}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-2xl leading-none text-white transition hover:bg-white/25"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+          <div
+            className="relative flex max-h-[85vh] max-w-5xl items-center justify-center overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mainImage}
+              alt={product.name}
+              onClick={() => setZoomed((z) => !z)}
+              onMouseMove={handleZoomMove}
+              style={{
+                transform: zoomed ? "scale(2.4)" : "scale(1)",
+                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                cursor: zoomed ? "zoom-out" : "zoom-in",
+              }}
+              className="max-h-[85vh] w-auto object-contain transition-transform duration-200 select-none"
+            />
+          </div>
+          <p className="mt-4 text-xs uppercase tracking-wider text-white/70">
+            {zoomed ? "Clique para reduzir" : "Clique na imagem para dar zoom"}
+          </p>
+          {images.length > 1 ? (
+            <div className="mt-4 flex flex-wrap justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {images.map((img, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => {
+                    setActive(i);
+                    setZoomed(false);
+                  }}
+                  className={`relative h-14 w-14 overflow-hidden rounded-md ring-2 transition ${
+                    i === active ? "ring-white" : "ring-transparent opacity-60 hover:opacity-100"
+                  }`}
+                  aria-label={`Ver imagem ${i + 1}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={productImageUrl(img)}
+                    alt={`${product.name} ${i + 1}`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
