@@ -40,7 +40,7 @@ export default async function HomePage({
     : products;
 
   return (
-    <section id="produtos" className="container py-12 md:py-16">
+    <section id="produtos" className="container page-y">
       {categories.length > 0 ? (
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           <Link

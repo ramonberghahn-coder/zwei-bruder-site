@@ -13,6 +13,9 @@
   --radius-lg: 10px;
   --font-display: var(--font-cormorant), "Times New Roman", serif;
   --font-sans: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  --page-x: clamp(1.25rem, 4vw, 3rem);
+  --page-y: clamp(2rem, 5vw, 3.5rem);
+  --page-y-sm: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 * {
@@ -39,9 +42,22 @@ a {
 }
 
 .container {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--page-x);
+}
+
+.page-y {
+  padding-block: var(--page-y);
+}
+
+.page-y-sm {
+  padding-block: var(--page-y-sm);
+}
+
+.admin-page {
+  padding-block: var(--page-y-sm);
 }
 
 .nav-link {

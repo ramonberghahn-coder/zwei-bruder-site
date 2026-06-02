@@ -34,7 +34,7 @@ export default function AdminLoginForm() {
   }
 
   return (
-    <div className="container flex min-h-[70vh] items-center justify-center py-16">
+    <div className="container page-y flex min-h-[70vh] items-center justify-center">
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-medium">Painel admin</h1>
         <input

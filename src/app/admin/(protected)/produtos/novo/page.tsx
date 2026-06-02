@@ -12,7 +12,7 @@ export default async function NewProductPage() {
   }
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <h1 className="text-2xl font-medium">Novo produto</h1>
       <ProductForm endpoint="/api/admin/products/create" categories={categories} />
     </div>

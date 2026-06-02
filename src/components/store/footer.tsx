@@ -4,7 +4,7 @@ import type { StoreSettings } from "@/lib/settings";
 export default function Footer({ settings }: { settings: StoreSettings }) {
   return (
     <footer id="contato" className="mt-20 border-t border-[color:var(--border)] bg-[#f7f4f0]">
-      <div className="container py-14 md:py-16">
+      <div className="container page-y">
         <div className="grid gap-12 md:grid-cols-2">
           <div>
             <p className="font-display text-3xl font-medium">{settings.storeName}</p>

@@ -28,7 +28,7 @@ export default async function OrdersPage({
   const visible = orders.filter((o) => orderMatchesFilter(o.status, filtro));
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <h1 className="text-2xl font-medium">Pedidos</h1>
       <p className="mt-2 text-sm text-neutral-500">
         Confirme o pagamento após conferir o comprovante no WhatsApp. O pedido será liberado

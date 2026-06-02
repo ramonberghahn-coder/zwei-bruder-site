@@ -24,7 +24,7 @@ export default async function ThankYouPage({
 
   if (!order) {
     return (
-      <div className="container py-16">
+      <div className="container page-y">
         <h1 className="text-2xl font-medium">Pedido não encontrado</h1>
         <Link href="/" className="btn btn-primary mt-4 inline-flex">
           Voltar para loja
@@ -34,7 +34,7 @@ export default async function ThankYouPage({
   }
 
   return (
-    <div className="container py-12 md:py-16">
+    <div className="container page-y">
       <h1 className="text-2xl font-medium">Pedido {order.orderNumber}</h1>
       <p className="mt-2 text-sm text-neutral-600">
         Pague via PIX, envie o comprovante e confirme no WhatsApp.

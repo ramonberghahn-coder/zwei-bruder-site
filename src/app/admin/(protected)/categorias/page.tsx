@@ -12,7 +12,7 @@ export default async function CategoriesPage() {
   }
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <h1 className="text-2xl font-medium">Categorias</h1>
       <p className="mt-2 text-sm text-neutral-500">
         Crie as categorias usadas nos produtos. Elas aparecem como sugestão ao cadastrar um produto.

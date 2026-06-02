@@ -178,13 +178,13 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
   }
 
   if (!ready) {
-    return <div className="container py-20 text-center text-sm text-neutral-500">Carregando...</div>;
+    return <div className="container page-y text-center text-sm text-neutral-500">Carregando...</div>;
   }
 
   // Tela final
   if (stage === "done") {
     return (
-      <div className="container py-16 text-center md:py-24">
+      <div className="container page-y text-center">
         <h1 className="font-display text-4xl font-medium">Pedido enviado!</h1>
         <p className="mt-3 text-sm text-neutral-600">
           Pedido <strong>{payment?.orderNumber}</strong> registrado. No WhatsApp,{" "}
@@ -208,7 +208,7 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
   // Carrinho vazio
   if (items.length === 0 && stage === "cart") {
     return (
-      <div className="container py-16 text-center md:py-24">
+      <div className="container page-y text-center">
         <h1 className="font-display text-4xl font-medium">Seu carrinho está vazio</h1>
         <p className="mt-3 text-sm text-neutral-600">Explore os produtos e adicione seus favoritos.</p>
         <Link href="/#produtos" className="btn btn-primary mt-8 inline-flex">
@@ -219,7 +219,7 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
   }
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container page-y">
       <div className="grid gap-10 lg:grid-cols-[1fr_380px] lg:gap-16">
         {/* Coluna esquerda: itens ou PIX */}
         <div>

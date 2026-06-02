@@ -7,7 +7,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="container py-20 text-center">
+    <div className="container page-y text-center">
       <h1 className="text-2xl font-medium">Algo deu errado</h1>
       <p className="mt-2 text-sm text-neutral-600">
         Tente recarregar a página. Se a loja estiver vazia ou o erro continuar, abra no

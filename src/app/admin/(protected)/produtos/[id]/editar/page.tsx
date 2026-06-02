@@ -17,7 +17,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <h1 className="text-2xl font-medium">Editar produto</h1>
       <ProductForm
         endpoint={`/api/admin/products/update?id=${product.id}`}

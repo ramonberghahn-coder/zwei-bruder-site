@@ -23,7 +23,7 @@ export default async function AdminPage() {
   const recent = orders.slice(0, 8);
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <h1 className="text-2xl font-medium">Dashboard</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Resumo de pedidos e vendas da loja.

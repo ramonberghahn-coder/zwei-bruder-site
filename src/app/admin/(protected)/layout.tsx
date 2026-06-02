@@ -16,10 +16,10 @@ export default async function ProtectedAdminLayout({
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-[#fafafa]">
       <DatabaseBanner />
       <header className="border-b border-neutral-200 bg-white">
-        <div className="container flex flex-col gap-4 py-4 md:flex-row md:items-center md:justify-between">
+        <div className="container flex flex-col gap-4 py-5 md:flex-row md:items-center md:justify-between">
           <AdminNav />
           <div className="flex items-center gap-2">
             <Link href="/" className="btn btn-secondary !py-2.5 !px-4">
@@ -30,6 +30,6 @@ export default async function ProtectedAdminLayout({
         </div>
       </header>
       {children}
-    </>
+    </div>
   );
 }

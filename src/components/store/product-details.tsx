@@ -86,7 +86,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   }
 
   return (
-    <div className="container grid gap-12 py-12 md:grid-cols-2 md:gap-16 md:py-20">
+    <div className="container page-y grid gap-12 md:grid-cols-2 md:gap-16">
       <div className="flex flex-col gap-3">
         <button
           type="button"

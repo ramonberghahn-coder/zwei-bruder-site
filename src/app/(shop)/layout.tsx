@@ -10,7 +10,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
     <>
       <TopBar settings={settings} />
       <Header settings={settings} />
-      <main>{children}</main>
+      <main className="min-h-[40vh]">{children}</main>
       <Footer settings={settings} />
     </>
   );

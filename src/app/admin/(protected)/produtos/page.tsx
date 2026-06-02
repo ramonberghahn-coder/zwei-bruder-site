@@ -56,7 +56,7 @@ export default async function AdminProductsPage() {
   ].filter((g) => g.products.length > 0);
 
   return (
-    <div className="container py-10">
+    <div className="container admin-page">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-medium">Produtos</h1>
         <Link className="btn btn-primary" href="/admin/produtos/novo">
