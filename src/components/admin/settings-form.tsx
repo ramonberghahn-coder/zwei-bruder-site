@@ -121,6 +121,62 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
         />
       </div>
 
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
+        <p className="text-sm font-medium">Entrega / Retirada</p>
+        <p className="mt-1 text-xs text-neutral-500">
+          Ative a retirada para o cliente poder escolher buscar o pedido em vez de receber por envio.
+        </p>
+        <label className="mt-3 block text-xs text-neutral-500">Permitir retirada?</label>
+        <select className="input mt-1 bg-white" name="pickupEnabled" defaultValue={initial.pickupEnabled}>
+          <option value="false">Não</option>
+          <option value="true">Sim</option>
+        </select>
+        <input
+          className="input mt-3 bg-white"
+          name="pickupAddress"
+          defaultValue={initial.pickupAddress}
+          placeholder="Endereço / instruções para retirada"
+        />
+      </div>
+
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
+        <p className="text-sm font-medium">Gravação (logo ou nome)</p>
+        <p className="mt-1 text-xs text-neutral-500">
+          Defina os valores cobrados por gravação. O cliente escolhe no carrinho gravar em 1 ou 2 lados.
+        </p>
+        <label className="mt-3 block text-xs text-neutral-500">Oferecer gravação?</label>
+        <select className="input mt-1 bg-white" name="engravingEnabled" defaultValue={initial.engravingEnabled}>
+          <option value="false">Desativado</option>
+          <option value="true">Ativado</option>
+        </select>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-neutral-500">Gravação 1 lado (R$)</label>
+            <input
+              className="input mt-1 bg-white"
+              name="engravingPrice1"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={initial.engravingPrice1}
+              placeholder="0,00"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-neutral-500">Gravação 2 lados (R$)</label>
+            <input
+              className="input mt-1 bg-white"
+              name="engravingPrice2"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={initial.engravingPrice2}
+              placeholder="0,00"
+            />
+          </div>
+        </div>
+      </div>
+
       <textarea className="textarea" rows={4} name="aboutText" defaultValue={initial.aboutText} placeholder="Sobre a marca" />
       <button type="submit" className="btn btn-primary" disabled={saving}>
         {saving ? "Salvando..." : "Salvar configurações"}

@@ -9,17 +9,26 @@ import type { ShippingOption } from "@/lib/shipping";
 
 type Stage = "cart" | "payment" | "done";
 
+type CartSettings = {
+  pickupEnabled: boolean;
+  pickupAddress: string;
+  engravingEnabled: boolean;
+  engravingPrice1: number;
+  engravingPrice2: number;
+};
+
 type PaymentData = {
   orderNumber: string;
   pixPayload: string;
   qrDataUrl: string;
   subtotal: number;
   shippingCost: number;
+  engravingCost: number;
   total: number;
   hasWaitlist: boolean;
 };
 
-export default function CartPage() {
+export default function CartPage({ settings }: { settings: CartSettings }) {
   const { items, removeItem, updateQty, clearCart, total, count, ready } = useCart();
   const [stage, setStage] = useState<Stage>("cart");
   const [loading, setLoading] = useState(false);
@@ -36,9 +45,19 @@ export default function CartPage() {
   const [shipDest, setShipDest] = useState<{ uf: string; city: string } | null>(null);
   const [selectedShip, setSelectedShip] = useState<ShippingOption | null>(null);
 
+  const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
+  const [engravingOn, setEngravingOn] = useState(false);
+  const [engravingSides, setEngravingSides] = useState<1 | 2>(1);
+  const [engravingText, setEngravingText] = useState("");
+
   const cartHasWaitlist = items.some((i) => isWaitlist(i.stock));
-  const shippingCost = selectedShip?.price ?? 0;
-  const displayTotal = payment ? payment.total : total + shippingCost;
+  const isPickup = settings.pickupEnabled && deliveryMethod === "pickup";
+  const shippingCost = isPickup ? 0 : selectedShip?.price ?? 0;
+  const engravingUnit = engravingSides === 2 ? settings.engravingPrice2 : settings.engravingPrice1;
+  const engravingCost = settings.engravingEnabled && engravingOn ? engravingUnit : 0;
+  const displayTotal = payment
+    ? payment.total
+    : total + shippingCost + engravingCost;
 
   async function calcularFrete() {
     setShipError(null);
@@ -85,11 +104,18 @@ export default function CartPage() {
         customerEmail: String(formData.get("customerEmail") || "").trim(),
         address: String(formData.get("address") || "").trim(),
         notes: String(formData.get("notes") || "").trim(),
-        shippingCost: selectedShip?.price ?? 0,
-        shippingService: selectedShip
-          ? `${selectedShip.service} • ${selectedShip.days} dia(s) úteis`
-          : undefined,
-        shippingCep: shipDest ? cep.replace(/\D/g, "") : undefined,
+        deliveryMethod,
+        shippingCost: isPickup ? 0 : selectedShip?.price ?? 0,
+        shippingService: isPickup
+          ? "Retirada"
+          : selectedShip
+            ? `${selectedShip.service} • ${selectedShip.days} dia(s) úteis`
+            : undefined,
+        shippingCep: !isPickup && shipDest ? cep.replace(/\D/g, "") : undefined,
+        engraving:
+          settings.engravingEnabled && engravingOn
+            ? { sides: engravingSides, text: engravingText.trim() }
+            : undefined,
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       };
 
@@ -109,6 +135,7 @@ export default function CartPage() {
         qrDataUrl: data.qrDataUrl,
         subtotal: data.subtotal ?? orderTotal,
         shippingCost: data.shippingCost ?? 0,
+        engravingCost: data.engravingCost ?? 0,
         total: orderTotal,
         hasWaitlist: Boolean(data.hasWaitlist),
       });
@@ -348,24 +375,72 @@ export default function CartPage() {
                 <dd>{formatCurrency(payment ? payment.subtotal : total)}</dd>
               </div>
               <div className="flex justify-between text-neutral-600">
-                <dt>Frete</dt>
+                <dt>{isPickup ? "Entrega" : "Frete"}</dt>
                 <dd>
                   {payment
                     ? payment.shippingCost > 0
                       ? formatCurrency(payment.shippingCost)
-                      : "A combinar"
-                    : selectedShip
-                      ? formatCurrency(selectedShip.price)
-                      : "Calcular abaixo"}
+                      : isPickup
+                        ? "Retirada"
+                        : "A combinar"
+                    : isPickup
+                      ? "Retirada"
+                      : selectedShip
+                        ? formatCurrency(selectedShip.price)
+                        : "Calcular abaixo"}
                 </dd>
               </div>
+              {(payment ? payment.engravingCost : engravingCost) > 0 ? (
+                <div className="flex justify-between text-neutral-600">
+                  <dt>
+                    Gravação
+                    {!payment ? ` (${engravingSides} lado${engravingSides > 1 ? "s" : ""})` : ""}
+                  </dt>
+                  <dd>{formatCurrency(payment ? payment.engravingCost : engravingCost)}</dd>
+                </div>
+              ) : null}
               <div className="flex justify-between border-t border-neutral-200 pt-3 text-base font-medium">
                 <dt>Total</dt>
                 <dd>{formatCurrency(displayTotal)}</dd>
               </div>
             </dl>
 
-            {stage === "cart" && (
+            {stage === "cart" && settings.pickupEnabled && (
+              <div className="mt-6 border-t border-neutral-200 pt-5">
+                <p className="text-sm font-medium">Como deseja receber?</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod("shipping")}
+                    className={`rounded-md border p-2.5 text-sm transition ${
+                      !isPickup
+                        ? "border-[color:var(--accent)] bg-[#faf6f2] font-medium"
+                        : "border-neutral-200"
+                    }`}
+                  >
+                    Envio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod("pickup")}
+                    className={`rounded-md border p-2.5 text-sm transition ${
+                      isPickup
+                        ? "border-[color:var(--accent)] bg-[#faf6f2] font-medium"
+                        : "border-neutral-200"
+                    }`}
+                  >
+                    Retirada
+                  </button>
+                </div>
+                {isPickup && settings.pickupAddress ? (
+                  <p className="mt-3 rounded-md bg-neutral-50 p-3 text-xs text-neutral-600">
+                    <span className="font-medium">Local de retirada:</span> {settings.pickupAddress}
+                  </p>
+                ) : null}
+              </div>
+            )}
+
+            {stage === "cart" && !isPickup && (
               <div className="mt-6 border-t border-neutral-200 pt-5">
                 <p className="text-sm font-medium">Calcular frete</p>
                 <div className="mt-2 flex gap-2">
@@ -431,6 +506,60 @@ export default function CartPage() {
                     <p className="text-[11px] text-neutral-500">
                       Estimativa. O valor final é confirmado no WhatsApp.
                     </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {stage === "cart" && settings.engravingEnabled && (
+              <div className="mt-6 border-t border-neutral-200 pt-5">
+                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={engravingOn}
+                    onChange={(e) => setEngravingOn(e.target.checked)}
+                  />
+                  Adicionar gravação (logo ou nome)
+                </label>
+
+                {engravingOn ? (
+                  <div className="mt-3 space-y-3">
+                    <input
+                      className="input"
+                      placeholder="Nome ou logo a gravar"
+                      value={engravingText}
+                      onChange={(e) => setEngravingText(e.target.value)}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEngravingSides(1)}
+                        className={`rounded-md border p-2.5 text-sm transition ${
+                          engravingSides === 1
+                            ? "border-[color:var(--accent)] bg-[#faf6f2] font-medium"
+                            : "border-neutral-200"
+                        }`}
+                      >
+                        1 lado
+                        <span className="block text-xs text-neutral-500">
+                          {formatCurrency(settings.engravingPrice1)}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEngravingSides(2)}
+                        className={`rounded-md border p-2.5 text-sm transition ${
+                          engravingSides === 2
+                            ? "border-[color:var(--accent)] bg-[#faf6f2] font-medium"
+                            : "border-neutral-200"
+                        }`}
+                      >
+                        2 lados
+                        <span className="block text-xs text-neutral-500">
+                          {formatCurrency(settings.engravingPrice2)}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </div>

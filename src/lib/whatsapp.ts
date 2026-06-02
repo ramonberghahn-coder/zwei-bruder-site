@@ -17,6 +17,9 @@ type WhatsAppOrderParams = {
   shippingCost?: number;
   shippingService?: string | null;
   shippingCep?: string | null;
+  deliveryMethod?: string | null;
+  engravingCost?: number;
+  engravingInfo?: string | null;
   total: number;
   paymentProofUrl?: string | null;
   siteUrl: string;
@@ -61,12 +64,24 @@ export function buildWhatsAppMessage(params: WhatsAppOrderParams): string {
     lines.push("", `*Subtotal:* ${formatCurrency(params.subtotal)}`);
   }
 
-  if (params.shippingCost && params.shippingCost > 0) {
-    const svc = params.shippingService ? ` (${params.shippingService})` : "";
-    lines.push(`*Frete${svc}:* ${formatCurrency(params.shippingCost)}`);
+  if (params.engravingInfo) {
+    const val =
+      params.engravingCost && params.engravingCost > 0
+        ? ` — ${formatCurrency(params.engravingCost)}`
+        : "";
+    lines.push(`*${params.engravingInfo}*${val}`);
   }
-  if (params.shippingCep) {
-    lines.push(`*CEP de entrega:* ${params.shippingCep}`);
+
+  if (params.deliveryMethod === "pickup") {
+    lines.push("*Entrega:* Retirada");
+  } else {
+    if (params.shippingCost && params.shippingCost > 0) {
+      const svc = params.shippingService ? ` (${params.shippingService})` : "";
+      lines.push(`*Frete${svc}:* ${formatCurrency(params.shippingCost)}`);
+    }
+    if (params.shippingCep) {
+      lines.push(`*CEP de entrega:* ${params.shippingCep}`);
+    }
   }
 
   lines.push("", `*Total:* ${formatCurrency(params.total)}`);

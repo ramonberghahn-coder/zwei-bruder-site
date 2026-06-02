@@ -38,6 +38,9 @@ model Order {
   shippingCost    Float    @default(0)
   shippingService String?
   shippingCep     String?
+  deliveryMethod  String?
+  engravingCost   Float    @default(0)
+  engravingInfo   String?
   total           Float
   status          String   @default("reserved")
   paymentProofUrl String?

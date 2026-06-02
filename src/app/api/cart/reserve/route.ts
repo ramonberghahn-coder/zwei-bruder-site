@@ -14,6 +14,13 @@ const reserveSchema = z.object({
   shippingCost: z.coerce.number().min(0).optional(),
   shippingService: z.string().optional(),
   shippingCep: z.string().optional(),
+  deliveryMethod: z.enum(["shipping", "pickup"]).optional(),
+  engraving: z
+    .object({
+      sides: z.coerce.number().int().min(1).max(2),
+      text: z.string().optional(),
+    })
+    .optional(),
   items: z.array(
     z.object({
       productId: z.string(),
@@ -44,10 +51,29 @@ export async function POST(req: Request) {
 
     const hasWaitlist = itemRows.some((row) => row.waitlistQty > 0);
     const subtotal = itemRows.reduce((acc, row) => acc + row.product.price * row.quantity, 0);
-    const shippingCost = Math.max(0, body.shippingCost ?? 0);
-    const total = subtotal + shippingCost;
     const orderNumber = generateOrderNumber();
     const settings = await getSettings();
+
+    const isPickup =
+      body.deliveryMethod === "pickup" && settings.pickupEnabled === "true";
+    const shippingCost = isPickup ? 0 : Math.max(0, body.shippingCost ?? 0);
+    const shippingService = isPickup ? "Retirada" : body.shippingService;
+
+    let engravingCost = 0;
+    let engravingInfo: string | null = null;
+    if (settings.engravingEnabled === "true" && body.engraving) {
+      const sides = body.engraving.sides === 2 ? 2 : 1;
+      engravingCost =
+        sides === 2
+          ? Number(settings.engravingPrice2) || 0
+          : Number(settings.engravingPrice1) || 0;
+      const text = (body.engraving.text || "").trim();
+      engravingInfo = `Gravação ${sides} lado${sides > 1 ? "s" : ""}${
+        text ? ` — "${text}"` : ""
+      }`;
+    }
+
+    const total = subtotal + shippingCost + engravingCost;
     const customQr = (settings.pixQrImage || "").trim();
 
     // Prioriza o PIX dinâmico (com o valor do pedido embutido).
@@ -91,8 +117,11 @@ export async function POST(req: Request) {
           ),
           subtotal,
           shippingCost,
-          shippingService: body.shippingService,
+          shippingService,
           shippingCep: body.shippingCep,
+          deliveryMethod: isPickup ? "pickup" : "shipping",
+          engravingCost,
+          engravingInfo,
           total,
           status: hasWaitlist ? "waitlist" : "reserved",
           pixPayload,
@@ -111,6 +140,7 @@ export async function POST(req: Request) {
       total,
       subtotal,
       shippingCost,
+      engravingCost,
       hasWaitlist,
     });
   } catch (error) {

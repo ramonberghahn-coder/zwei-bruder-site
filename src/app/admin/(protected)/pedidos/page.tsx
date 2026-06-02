@@ -19,6 +19,15 @@ export default async function OrdersPage() {
             <p className="mt-1 text-sm text-neutral-600">
               {order.customerName} · {order.customerPhone}
             </p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {order.deliveryMethod === "pickup" ? "Retirada" : "Envio"}
+              {order.shippingService && order.deliveryMethod !== "pickup"
+                ? ` · ${order.shippingService}`
+                : ""}
+            </p>
+            {order.engravingInfo ? (
+              <p className="mt-1 text-sm text-neutral-600">{order.engravingInfo}</p>
+            ) : null}
             <p className="mt-2 text-base font-semibold">Total: {formatCurrency(order.total)}</p>
             {order.paymentProofUrl ? (
               <a href={order.paymentProofUrl} target="_blank" className="mt-2 inline-block text-sm text-blue-600">

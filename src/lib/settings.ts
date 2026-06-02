@@ -11,6 +11,11 @@ export type StoreSettings = {
   pixMerchantCity: string;
   pixQrImage: string;
   pixCopyPaste: string;
+  pickupEnabled: string;
+  pickupAddress: string;
+  engravingEnabled: string;
+  engravingPrice1: string;
+  engravingPrice2: string;
   aboutText: string;
   instagram: string;
 };
@@ -26,6 +31,11 @@ export const storeSettingsDefaults: StoreSettings = {
   pixMerchantCity: "SAO PAULO",
   pixQrImage: "",
   pixCopyPaste: "",
+  pickupEnabled: "false",
+  pickupAddress: "",
+  engravingEnabled: "false",
+  engravingPrice1: "0",
+  engravingPrice2: "0",
   aboutText: "",
   instagram: "@zweibruder",
 };
