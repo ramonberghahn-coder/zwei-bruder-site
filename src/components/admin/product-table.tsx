@@ -16,7 +16,13 @@ export type ProductRow = {
   image: string;
 };
 
-export default function ProductTable({ products }: { products: ProductRow[] }) {
+export default function ProductTable({
+  products,
+  compact = false,
+}: {
+  products: ProductRow[];
+  compact?: boolean;
+}) {
   const router = useRouter();
   const [rows, setRows] = useState<ProductRow[]>(products);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -58,11 +64,15 @@ export default function ProductTable({ products }: { products: ProductRow[] }) {
 
   return (
     <>
-      <p className="mt-6 text-sm text-neutral-500">
-        Arraste as linhas (pelo ícone <span className="font-medium">⠿</span>) para reordenar, ou use
-        as setas. A ordem é aplicada na loja automaticamente.
-      </p>
-      <div className="mt-4 overflow-auto border border-neutral-200 bg-white">
+      {!compact ? (
+        <p className="mt-6 text-sm text-neutral-500">
+          Arraste as linhas (pelo ícone <span className="font-medium">⠿</span>) para reordenar, ou use
+          as setas. A ordem é aplicada na loja automaticamente.
+        </p>
+      ) : null}
+      <div
+        className={`overflow-auto border border-neutral-200 bg-white ${compact ? "mt-4" : "mt-4"}`}
+      >
         <table className="min-w-full text-sm">
           <thead className="bg-neutral-50 text-left uppercase tracking-wider text-neutral-600">
             <tr>
