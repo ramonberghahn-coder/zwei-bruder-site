@@ -1,6 +1,25 @@
 import { neon } from "@neondatabase/serverless";
 import { getAppDatabaseUrl } from "@/lib/database-url";
 
+// O Neon free pode estar suspenso na primeira requisição ("fetch failed").
+// Reexecuta operações que falham por motivos transitórios de conexão.
+async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < tries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const msg = error instanceof Error ? error.message : "";
+      const transient =
+        /fetch failed|terminated|connection|econnreset|timeout|socket/i.test(msg);
+      if (!transient || attempt === tries - 1) throw error;
+      await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 /**
  * Seed via driver HTTP do Neon: cada statement é uma requisição independente,
  * sem sessão WebSocket nem transação que possa cair no host -pooler.
@@ -12,6 +31,9 @@ export async function runSeed(): Promise<void> {
   }
 
   const sql = neon(url);
+
+  // Acorda o banco (free tier) antes dos inserts.
+  await withRetry(() => sql`SELECT 1`);
 
   const defaults: Record<string, string> = {
     storeName: "Zwei Brüder",
@@ -28,11 +50,13 @@ export async function runSeed(): Promise<void> {
   };
 
   for (const [key, value] of Object.entries(defaults)) {
-    await sql`
-      INSERT INTO "Setting" (key, value)
-      VALUES (${key}, ${value})
-      ON CONFLICT (key) DO NOTHING
-    `;
+    await withRetry(
+      () => sql`
+        INSERT INTO "Setting" (key, value)
+        VALUES (${key}, ${value})
+        ON CONFLICT (key) DO NOTHING
+      `
+    );
   }
 
   const products = [
@@ -84,12 +108,14 @@ export async function runSeed(): Promise<void> {
   ];
 
   for (const p of products) {
-    await sql`
-      INSERT INTO "Product"
-        (id, name, slug, description, price, "compareAt", category, images, stock, featured, active, "createdAt", "updatedAt")
-      VALUES
-        (gen_random_uuid()::text, ${p.name}, ${p.slug}, ${p.description}, ${p.price}, ${p.compareAt}, ${p.category}, ${p.images}, ${p.stock}, ${p.featured}, ${p.active}, now(), now())
-      ON CONFLICT (slug) DO NOTHING
-    `;
+    await withRetry(
+      () => sql`
+        INSERT INTO "Product"
+          (id, name, slug, description, price, "compareAt", category, images, stock, featured, active, "createdAt", "updatedAt")
+        VALUES
+          (gen_random_uuid()::text, ${p.name}, ${p.slug}, ${p.description}, ${p.price}, ${p.compareAt}, ${p.category}, ${p.images}, ${p.stock}, ${p.featured}, ${p.active}, now(), now())
+        ON CONFLICT (slug) DO NOTHING
+      `
+    );
   }
 }

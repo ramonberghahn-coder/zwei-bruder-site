@@ -62,21 +62,27 @@ export async function GET(req: Request) {
     );
   }
 
+  // O schema (db_push) já foi aplicado com sucesso neste ponto. O seed apenas
+  // insere dados de exemplo (ON CONFLICT DO NOTHING), então uma falha aqui não
+  // é crítica — não bloqueia o uso do painel nem da loja.
   try {
     await runSeed();
     return NextResponse.json({
       ok: true,
-      message: "Banco criado e dados iniciais carregados com sucesso.",
+      schema: "updated",
+      seed: "ok",
+      message: "Banco atualizado e dados iniciais carregados com sucesso.",
       hints: databaseUrlDiagnostics(),
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: prismaErrorMessage(error),
-        step: "seed",
-        hints: databaseUrlDiagnostics(),
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      ok: true,
+      schema: "updated",
+      seed: "skipped",
+      seedError: prismaErrorMessage(error),
+      message:
+        "Schema do banco atualizado com sucesso. O seed de dados de exemplo falhou (conexão instável), mas isso não afeta seus dados existentes. Você pode rodar /api/setup novamente mais tarde se quiser os exemplos.",
+      hints: databaseUrlDiagnostics(),
+    });
   }
 }
