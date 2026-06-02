@@ -86,3 +86,33 @@ export function canMarkComplete(status: string): boolean {
   const s = normalizeOrderStatus(status);
   return s === "ready_pickup" || s === "ready_shipping";
 }
+
+export type OrderFilter = "todos" | "aguardando" | "liberados" | "concluidos";
+
+export const ORDER_FILTERS: { id: OrderFilter; label: string }[] = [
+  { id: "todos", label: "Todos" },
+  { id: "aguardando", label: "Aguardando pagamento" },
+  { id: "liberados", label: "Liberados" },
+  { id: "concluidos", label: "Concluídos" },
+];
+
+export function parseOrderFilter(value: string | undefined): OrderFilter {
+  if (value === "aguardando" || value === "liberados" || value === "concluidos") return value;
+  return "todos";
+}
+
+export function orderMatchesFilter(status: string, filter: OrderFilter): boolean {
+  if (filter === "todos") return true;
+  const s = normalizeOrderStatus(status);
+  if (filter === "aguardando") return s === "awaiting_payment";
+  if (filter === "liberados") return s === "ready_pickup" || s === "ready_shipping";
+  if (filter === "concluidos") return s === "completed_pickup" || s === "completed_shipping";
+  return true;
+}
+
+export function countOrdersByFilter(
+  orders: { status: string }[],
+  filter: OrderFilter
+): number {
+  return orders.filter((o) => orderMatchesFilter(o.status, filter)).length;
+}
