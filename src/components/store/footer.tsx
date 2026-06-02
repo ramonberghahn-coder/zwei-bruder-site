@@ -1,4 +1,5 @@
-﻿import SocialLinks from "./social-links";
+﻿import Link from "next/link";
+import SocialLinks from "./social-links";
 import type { StoreSettings } from "@/lib/settings";
 
 export default function Footer({ settings }: { settings: StoreSettings }) {
@@ -16,7 +17,7 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
 
           <div className="md:text-right">
             <p className="footer-heading">Encontre-nos</p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-600 md:flex md:flex-col md:items-end">
+            <div className="mt-4 flex flex-col items-start gap-3 text-sm text-neutral-600 md:items-end">
               <SocialLinks
                 instagram={settings.instagram}
                 whatsappNumber={settings.whatsappNumber}
@@ -28,6 +29,9 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
                   {settings.contactEmail}
                 </a>
               </p>
+              <Link href="/admin/login" className="btn btn-secondary !py-2.5 !px-4 md:ml-auto">
+                Entrar
+              </Link>
             </div>
           </div>
         </div>
