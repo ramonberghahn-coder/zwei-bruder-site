@@ -37,7 +37,6 @@ export default function AdminLoginForm() {
     <div className="container flex min-h-[70vh] items-center justify-center py-16">
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-medium">Painel admin</h1>
-        <p className="text-sm text-neutral-500">Use a senha definida em ADMIN_PASSWORD na Render.</p>
         <input
           type="password"
           className="input"
