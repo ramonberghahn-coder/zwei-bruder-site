@@ -48,7 +48,10 @@ export async function POST(req: Request) {
     const total = subtotal + shippingCost;
     const orderNumber = generateOrderNumber();
     const settings = await getSettings();
-    const pixPayload = buildPixPayload(settings, total, orderNumber);
+    const customQr = (settings.pixQrImage || "").trim();
+    const pixPayload = customQr
+      ? (settings.pixCopyPaste || "").trim()
+      : buildPixPayload(settings, total, orderNumber);
 
     const order = await prisma.$transaction(async (tx) => {
       for (const row of itemRows) {
@@ -88,7 +91,9 @@ export async function POST(req: Request) {
       });
     });
 
-    const qrDataUrl = await generatePixQrDataUrl(pixPayload);
+    const qrDataUrl = customQr
+      ? customQr
+      : await generatePixQrDataUrl(pixPayload);
 
     return NextResponse.json({
       orderNumber: order.orderNumber,

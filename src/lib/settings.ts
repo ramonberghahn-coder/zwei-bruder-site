@@ -9,6 +9,8 @@ export type StoreSettings = {
   pixKeyType: string;
   pixMerchantName: string;
   pixMerchantCity: string;
+  pixQrImage: string;
+  pixCopyPaste: string;
   aboutText: string;
   instagram: string;
 };
@@ -22,6 +24,8 @@ export const storeSettingsDefaults: StoreSettings = {
   pixKeyType: "email",
   pixMerchantName: "ZWEI BRUDER",
   pixMerchantCity: "SAO PAULO",
+  pixQrImage: "",
+  pixCopyPaste: "",
   aboutText: "",
   instagram: "@zweibruder",
 };

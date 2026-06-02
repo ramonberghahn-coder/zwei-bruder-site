@@ -303,11 +303,19 @@ export default function CartPage() {
                   </div>
                 ) : null}
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-neutral-500">Copia e cola PIX</p>
-                  <textarea className="textarea mt-2" rows={4} readOnly value={payment.pixPayload} />
-                  <button type="button" className="btn btn-secondary mt-2" onClick={copyPix}>
-                    Copiar código PIX
-                  </button>
+                  <p className="text-sm text-neutral-600">
+                    Aponte a câmera do seu banco para o QR Code e pague o valor de{" "}
+                    <strong>{formatCurrency(payment.total)}</strong>.
+                  </p>
+                  {payment.pixPayload ? (
+                    <div className="mt-4">
+                      <p className="text-xs uppercase tracking-wider text-neutral-500">Copia e cola PIX</p>
+                      <textarea className="textarea mt-2" rows={4} readOnly value={payment.pixPayload} />
+                      <button type="button" className="btn btn-secondary mt-2" onClick={copyPix}>
+                        Copiar código PIX
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
