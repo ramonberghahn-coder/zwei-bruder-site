@@ -8,7 +8,7 @@ export default async function HomePage() {
   try {
     products = await prisma.product.findMany({
       where: { active: true },
-      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
   } catch {
     products = [];
