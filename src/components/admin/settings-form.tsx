@@ -80,10 +80,11 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
       <input className="input" name="pixMerchantCity" defaultValue={initial.pixMerchantCity} placeholder="Cidade PIX" required />
 
       <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
-        <p className="text-sm font-medium">QR Code do PIX (opcional)</p>
+        <p className="text-sm font-medium">QR Code do PIX — backup (opcional)</p>
         <p className="mt-1 text-xs text-neutral-500">
-          Envie o QR Code do seu banco. Quando preenchido, ele será exibido ao cliente no
-          fechamento do carrinho em vez do QR gerado automaticamente.
+          O site gera automaticamente um QR Code <strong>com o valor de cada pedido</strong> a
+          partir da sua chave PIX acima. Este QR enviado é apenas um <strong>backup</strong>: ele só
+          é usado se a geração automática falhar. Como é um QR fixo do banco, ele não inclui o valor.
         </p>
 
         {pixQrImage ? (

@@ -49,9 +49,18 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber();
     const settings = await getSettings();
     const customQr = (settings.pixQrImage || "").trim();
-    const pixPayload = customQr
-      ? (settings.pixCopyPaste || "").trim()
-      : buildPixPayload(settings, total, orderNumber);
+
+    // Prioriza o PIX dinâmico (com o valor do pedido embutido).
+    // Usa o QR enviado no painel apenas como backup, caso a geração falhe.
+    let pixPayload = "";
+    let useDynamicQr = false;
+    try {
+      pixPayload = buildPixPayload(settings, total, orderNumber);
+      useDynamicQr = true;
+    } catch (pixError) {
+      if (!customQr) throw pixError;
+      pixPayload = (settings.pixCopyPaste || "").trim();
+    }
 
     const order = await prisma.$transaction(async (tx) => {
       for (const row of itemRows) {
@@ -91,9 +100,9 @@ export async function POST(req: Request) {
       });
     });
 
-    const qrDataUrl = customQr
-      ? customQr
-      : await generatePixQrDataUrl(pixPayload);
+    const qrDataUrl = useDynamicQr
+      ? await generatePixQrDataUrl(pixPayload)
+      : customQr;
 
     return NextResponse.json({
       orderNumber: order.orderNumber,
