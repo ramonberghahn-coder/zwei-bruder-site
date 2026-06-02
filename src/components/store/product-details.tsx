@@ -33,6 +33,12 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   const waitlist = isWaitlist(product.stock);
   const maxQty = maxOrderQty(product.stock);
 
+  function openLightbox() {
+    setZoomed(false);
+    setZoomPos({ x: 50, y: 50 });
+    setLightboxOpen(true);
+  }
+
   function closeLightbox() {
     setLightboxOpen(false);
     setZoomed(false);
@@ -90,7 +96,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
       <div className="flex flex-col gap-3">
         <button
           type="button"
-          onClick={() => setLightboxOpen(true)}
+          onClick={openLightbox}
           className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-[10px] bg-[#f7f4f0]"
           aria-label="Ampliar imagem"
         >
@@ -200,7 +206,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
             ×
           </button>
           <div
-            className="relative flex max-h-[85vh] max-w-5xl items-center justify-center overflow-hidden"
+            className="relative flex h-[min(88vh,920px)] w-[min(92vw,720px)] max-h-[92vh] max-w-[92vw] items-center justify-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -209,16 +215,19 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
               alt={product.name}
               onClick={() => setZoomed((z) => !z)}
               onMouseMove={handleZoomMove}
+              draggable={false}
               style={{
-                transform: zoomed ? "scale(2.4)" : "scale(1)",
+                transform: zoomed ? "scale(2.5)" : "scale(1)",
                 transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
                 cursor: zoomed ? "zoom-out" : "zoom-in",
               }}
-              className="max-h-[85vh] w-auto object-contain transition-transform duration-200 select-none"
+              className={`h-full w-full object-contain select-none ${
+                zoomed ? "transition-transform duration-200 ease-out" : ""
+              }`}
             />
           </div>
           <p className="mt-4 text-xs uppercase tracking-wider text-white/70">
-            {zoomed ? "Clique para reduzir" : "Clique na imagem para dar zoom"}
+            {zoomed ? "Clique para voltar ao tamanho grande" : "Clique na imagem para ampliar detalhes"}
           </p>
           {images.length > 1 ? (
             <div className="mt-4 flex flex-wrap justify-center gap-2" onClick={(e) => e.stopPropagation()}>
