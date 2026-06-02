@@ -11,6 +11,8 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [pixQrImage, setPixQrImage] = useState(initial.pixQrImage || "");
+  const [storeName, setStoreName] = useState(initial.storeName);
+  const [aboutText, setAboutText] = useState(initial.aboutText || "");
 
   function handleQrUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -60,7 +62,14 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
     <form onSubmit={handleSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
       <div>
         <label className="text-xs text-neutral-500">Nome da marca</label>
-        <input className="input mt-1" name="storeName" defaultValue={initial.storeName} placeholder="Ex.: Zwei Brüder" required />
+        <input
+          className="input mt-1"
+          name="storeName"
+          value={storeName}
+          onChange={(e) => setStoreName(e.target.value)}
+          placeholder="Ex.: Zwei Brüder Co®"
+          required
+        />
       </div>
       <div>
         <label className="text-xs text-neutral-500">Slogan</label>
@@ -201,9 +210,34 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
         </div>
       </div>
 
-      <div>
-        <label className="text-xs text-neutral-500">Sobre a marca</label>
-        <textarea className="textarea mt-1" rows={4} name="aboutText" defaultValue={initial.aboutText} placeholder="Texto opcional sobre a marca" />
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
+        <p className="text-sm font-medium">Sobre a marca</p>
+        <p className="mt-1 text-xs text-neutral-500">
+          Aparece no rodapé da loja, abaixo do nome. Digite uma linha por frase.
+        </p>
+        <label className="mt-4 block text-xs text-neutral-500">Texto do rodapé</label>
+        <textarea
+          className="textarea mt-1 bg-white"
+          rows={5}
+          name="aboutText"
+          value={aboutText}
+          onChange={(e) => setAboutText(e.target.value)}
+          placeholder={
+            "Cutelaria artesanal de alto padrão\nLâminas que atravessam o tempo\nArte. Precisão. Legado."
+          }
+        />
+        <p className="mt-4 text-xs font-medium uppercase tracking-wider text-neutral-500">
+          Pré-visualização (como na loja)
+        </p>
+        <div className="mt-2 rounded-md border border-[color:var(--border)] bg-[#f7f4f0] p-6">
+          <p className="font-display text-3xl font-medium">
+            {storeName.trim() || "Nome da marca"}
+          </p>
+          <p className="mt-3 max-w-md whitespace-pre-line text-sm leading-relaxed text-neutral-600">
+            {aboutText.trim() ||
+              "Facas e acessórios em couro de alta qualidade. Cada peça é pensada para durar."}
+          </p>
+        </div>
       </div>
       <button type="submit" className="btn btn-primary" disabled={saving}>
         {saving ? "Salvando..." : "Salvar configurações"}

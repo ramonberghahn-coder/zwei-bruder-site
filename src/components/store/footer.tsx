@@ -8,8 +8,8 @@ export default function Footer({ settings }: { settings: StoreSettings }) {
         <div className="grid gap-12 md:grid-cols-2">
           <div>
             <p className="font-display text-3xl font-medium">{settings.storeName}</p>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600">
-              {settings.aboutText ||
+            <p className="mt-3 max-w-md whitespace-pre-line text-sm leading-relaxed text-neutral-600">
+              {settings.aboutText?.trim() ||
                 "Facas e acessórios em couro de alta qualidade. Cada peça é pensada para durar, com design limpo e materiais selecionados."}
             </p>
           </div>
