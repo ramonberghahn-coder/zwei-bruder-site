@@ -58,26 +58,50 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
-      <input className="input" name="storeName" defaultValue={initial.storeName} placeholder="Nome da marca" required />
-      <input className="input" name="storeTagline" defaultValue={initial.storeTagline} placeholder="Slogan" required />
-      <input
-        className="input"
-        name="whatsappNumber"
-        defaultValue={initial.whatsappNumber}
-        placeholder="WhatsApp (só números, com DDI: 5511999999999)"
-        required
-      />
-      <input
-        className="input"
-        name="instagram"
-        defaultValue={initial.instagram}
-        placeholder="Instagram (@usuario ou URL completa)"
-      />
-      <input className="input" name="contactEmail" defaultValue={initial.contactEmail} placeholder="Email de contato" required />
-      <input className="input" name="pixKey" defaultValue={initial.pixKey} placeholder="Chave PIX" required />
+      <div>
+        <label className="text-xs text-neutral-500">Nome da marca</label>
+        <input className="input mt-1" name="storeName" defaultValue={initial.storeName} placeholder="Ex.: Zwei Brüder" required />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Slogan</label>
+        <input className="input mt-1" name="storeTagline" defaultValue={initial.storeTagline} placeholder="Ex.: Facas e acessórios em couro" required />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">WhatsApp (com DDI)</label>
+        <input
+          className="input mt-1"
+          name="whatsappNumber"
+          defaultValue={initial.whatsappNumber}
+          placeholder="Só números: 5511999999999"
+          required
+        />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Instagram</label>
+        <input
+          className="input mt-1"
+          name="instagram"
+          defaultValue={initial.instagram}
+          placeholder="@usuario ou URL completa"
+        />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">E-mail de contato</label>
+        <input className="input mt-1" name="contactEmail" defaultValue={initial.contactEmail} placeholder="contato@exemplo.com" required />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Chave PIX</label>
+        <input className="input mt-1" name="pixKey" defaultValue={initial.pixKey} placeholder="E-mail, CPF/CNPJ, telefone ou chave aleatória" required />
+      </div>
       <input type="hidden" name="pixKeyType" defaultValue={initial.pixKeyType || "email"} />
-      <input className="input" name="pixMerchantName" defaultValue={initial.pixMerchantName} placeholder="Nome recebedor PIX" required />
-      <input className="input" name="pixMerchantCity" defaultValue={initial.pixMerchantCity} placeholder="Cidade PIX" required />
+      <div>
+        <label className="text-xs text-neutral-500">Nome do recebedor PIX</label>
+        <input className="input mt-1" name="pixMerchantName" defaultValue={initial.pixMerchantName} placeholder="Ex.: ZWEI BRUDER" required />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Cidade do PIX</label>
+        <input className="input mt-1" name="pixMerchantCity" defaultValue={initial.pixMerchantCity} placeholder="Ex.: SAO PAULO" required />
+      </div>
 
       <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
         <p className="text-sm font-medium">QR Code do PIX — backup (opcional)</p>
@@ -177,7 +201,10 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
         </div>
       </div>
 
-      <textarea className="textarea" rows={4} name="aboutText" defaultValue={initial.aboutText} placeholder="Sobre a marca" />
+      <div>
+        <label className="text-xs text-neutral-500">Sobre a marca</label>
+        <textarea className="textarea mt-1" rows={4} name="aboutText" defaultValue={initial.aboutText} placeholder="Texto opcional sobre a marca" />
+      </div>
       <button type="submit" className="btn btn-primary" disabled={saving}>
         {saving ? "Salvando..." : "Salvar configurações"}
       </button>

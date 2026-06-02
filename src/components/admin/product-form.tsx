@@ -139,19 +139,54 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 max-w-2xl space-y-4 border border-neutral-200 p-6">
-      <input name="name" className="input" placeholder="Nome" defaultValue={initial?.name} required />
-      <textarea
-        name="description"
-        className="textarea"
-        rows={4}
-        placeholder="Descrição (mínimo 5 caracteres)"
-        defaultValue={initial?.description}
-        required
-        minLength={5}
-      />
+      <div>
+        <label className="text-xs text-neutral-500">Nome</label>
+        <input
+          name="name"
+          className="input mt-1"
+          placeholder="Ex.: Faca Chef 20cm"
+          defaultValue={initial?.name}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-xs text-neutral-500">Descrição</label>
+        <textarea
+          name="description"
+          className="textarea mt-1"
+          rows={4}
+          placeholder="Mínimo 5 caracteres"
+          defaultValue={initial?.description}
+          required
+          minLength={5}
+        />
+      </div>
       <div className="grid gap-3 md:grid-cols-2">
-        <input name="price" type="number" step="0.01" min="0.01" className="input" placeholder="Preço" defaultValue={initial?.price} required />
-        <input name="stock" type="number" min="0" className="input" placeholder="Estoque" defaultValue={initial?.stock ?? 0} required />
+        <div>
+          <label className="text-xs text-neutral-500">Preço (R$)</label>
+          <input
+            name="price"
+            type="number"
+            step="0.01"
+            min="0.01"
+            className="input mt-1"
+            placeholder="0,00"
+            defaultValue={initial?.price}
+            required
+          />
+        </div>
+        <div>
+          <label className="text-xs text-neutral-500">Estoque</label>
+          <input
+            name="stock"
+            type="number"
+            min="0"
+            className="input mt-1"
+            placeholder="0"
+            defaultValue={initial?.stock ?? 0}
+            required
+          />
+        </div>
       </div>
       <div>
         <label className="text-xs text-neutral-500">Peso para frete (gramas)</label>
@@ -169,7 +204,16 @@ export default function ProductForm({
           Usado no cálculo de frete por CEP. Inclua a embalagem (ex.: faca ~500g).
         </p>
       </div>
-      <input name="category" className="input" placeholder="Categoria" defaultValue={initial?.category} required />
+      <div>
+        <label className="text-xs text-neutral-500">Categoria</label>
+        <input
+          name="category"
+          className="input mt-1"
+          placeholder="Ex.: Facas"
+          defaultValue={initial?.category}
+          required
+        />
+      </div>
 
       <div className="space-y-3 border border-neutral-200 p-4">
         <p className="text-sm font-medium">Imagens do produto</p>
