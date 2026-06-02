@@ -49,7 +49,7 @@ export async function POST(
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        status: "paid_waiting_confirmation",
+        status: "awaiting_payment",
         whatsappSent: true,
       },
     });

@@ -1,42 +1,49 @@
+import OrderCard from "@/components/admin/order-card";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
-  const orders = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
+  let orders: Awaited<ReturnType<typeof prisma.order.findMany>> = [];
+  try {
+    orders = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
+  } catch {
+    orders = [];
+  }
 
   return (
     <div className="container py-10">
       <h1 className="text-2xl font-medium">Pedidos</h1>
-      <div className="mt-8 space-y-4">
-        {orders.map((order) => (
-          <article key={order.id} className="card p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xl font-semibold">{order.orderNumber}</h2>
-              <span className="rounded-full border px-3 py-1 text-xs uppercase tracking-wider text-neutral-600">
-                {order.status}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-neutral-600">
-              {order.customerName} · {order.customerPhone}
-            </p>
-            <p className="mt-1 text-sm text-neutral-600">
-              {order.deliveryMethod === "pickup" ? "Retirada" : "Envio"}
-              {order.shippingService && order.deliveryMethod !== "pickup"
-                ? ` · ${order.shippingService}`
-                : ""}
-            </p>
-            {order.engravingInfo ? (
-              <p className="mt-1 text-sm text-neutral-600">{order.engravingInfo}</p>
-            ) : null}
-            <p className="mt-2 text-base font-semibold">Total: {formatCurrency(order.total)}</p>
-            {order.paymentProofUrl ? (
-              <a href={order.paymentProofUrl} target="_blank" className="mt-2 inline-block text-sm text-blue-600">
-                Ver comprovante
-              </a>
-            ) : null}
-          </article>
-        ))}
-      </div>
+      <p className="mt-2 text-sm text-neutral-500">
+        Confirme o pagamento após conferir o comprovante no WhatsApp. O pedido será liberado
+        para entrega ou retirada conforme a forma escolhida pelo cliente.
+      </p>
+
+      {orders.length === 0 ? (
+        <p className="mt-8 text-sm text-neutral-500">Nenhum pedido ainda.</p>
+      ) : (
+        <div className="mt-8 space-y-4">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={{
+                id: order.id,
+                orderNumber: order.orderNumber,
+                status: order.status,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                deliveryMethod: order.deliveryMethod,
+                shippingService: order.shippingService,
+                engravingInfo: order.engravingInfo,
+                total: order.total,
+                paymentProofUrl: order.paymentProofUrl,
+                whatsappSent: order.whatsappSent,
+                createdAt: order.createdAt.toISOString(),
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

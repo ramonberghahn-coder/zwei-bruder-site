@@ -141,7 +141,7 @@ export async function POST(req: Request) {
           engravingCost,
           engravingInfo,
           total,
-          status: hasWaitlist ? "waitlist" : "reserved",
+          status: "awaiting_payment",
           pixPayload,
         },
       })
