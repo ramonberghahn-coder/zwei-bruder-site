@@ -32,9 +32,11 @@ function imageLabel(url: string): string {
 export default function ProductForm({
   initial,
   endpoint,
+  categories = [],
 }: {
   initial?: Partial<ProductPayload>;
   endpoint: string;
+  categories?: string[];
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -206,13 +208,34 @@ export default function ProductForm({
       </div>
       <div>
         <label className="text-xs text-neutral-500">Categoria</label>
-        <input
-          name="category"
-          className="input mt-1"
-          placeholder="Ex.: Facas"
-          defaultValue={initial?.category}
-          required
-        />
+        {categories.length > 0 ? (
+          <>
+            <input
+              name="category"
+              className="input mt-1"
+              placeholder="Selecione ou digite uma categoria"
+              defaultValue={initial?.category}
+              list="category-options"
+              required
+            />
+            <datalist id="category-options">
+              {categories.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+            <p className="mt-1 text-xs text-neutral-500">
+              Crie e edite categorias na aba &quot;Categorias&quot;.
+            </p>
+          </>
+        ) : (
+          <input
+            name="category"
+            className="input mt-1"
+            placeholder="Ex.: Facas"
+            defaultValue={initial?.category}
+            required
+          />
+        )}
       </div>
 
       <div className="space-y-3 border border-neutral-200 p-4">

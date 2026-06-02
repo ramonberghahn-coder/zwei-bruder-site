@@ -16,6 +16,7 @@ export type StoreSettings = {
   engravingEnabled: string;
   engravingPrice1: string;
   engravingPrice2: string;
+  categories: string;
   aboutText: string;
   instagram: string;
 };
@@ -36,9 +37,32 @@ export const storeSettingsDefaults: StoreSettings = {
   engravingEnabled: "false",
   engravingPrice1: "0",
   engravingPrice2: "0",
+  categories: "[]",
   aboutText: "",
   instagram: "@zweibruder",
 };
+
+export function parseCategories(value: string | undefined | null): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed.map((v) => String(v).trim()).filter(Boolean);
+    }
+  } catch {
+    // valor antigo separado por vírgula
+    return value
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+export async function getCategories(): Promise<string[]> {
+  const settings = await getSettings();
+  return parseCategories(settings.categories);
+}
 
 function hasDatabaseUrl(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim());
