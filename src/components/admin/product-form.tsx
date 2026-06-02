@@ -8,6 +8,7 @@ type ProductPayload = {
   name: string;
   description: string;
   price: number;
+  costPrice: number;
   category: string;
   stock: number;
   weight: number;
@@ -112,6 +113,7 @@ export default function ProductForm({
       name: String(formData.get("name") || "").trim(),
       description: String(formData.get("description") || "").trim(),
       price: Number(formData.get("price") || 0),
+      costPrice: Number(formData.get("costPrice") || 0),
       category: String(formData.get("category") || "").trim(),
       stock: Number(formData.get("stock") || 0),
       weight: Number(formData.get("weight") || 0),
@@ -163,9 +165,9 @@ export default function ProductForm({
           minLength={5}
         />
       </div>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-3">
         <div>
-          <label className="text-xs text-neutral-500">Preço (R$)</label>
+          <label className="text-xs text-neutral-500">Preço de venda (R$)</label>
           <input
             name="price"
             type="number"
@@ -176,6 +178,19 @@ export default function ProductForm({
             defaultValue={initial?.price}
             required
           />
+        </div>
+        <div>
+          <label className="text-xs text-neutral-500">Preço de custo (R$)</label>
+          <input
+            name="costPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            className="input mt-1"
+            placeholder="0,00"
+            defaultValue={initial?.costPrice ?? 0}
+          />
+          <p className="mt-1 text-xs text-neutral-500">Usado no cálculo de lucro do dashboard.</p>
         </div>
         <div>
           <label className="text-xs text-neutral-500">Estoque</label>

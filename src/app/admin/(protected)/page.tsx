@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { computeDashboardStats } from "@/lib/dashboard-stats";
+import { computeDashboardStats, computeProfitStats } from "@/lib/dashboard-stats";
 import { getOrderStatusBadgeClass, getOrderStatusLabel } from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
@@ -8,11 +8,15 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   let products = 0;
+  let productRows: { id: string; price: number; costPrice: number; stock: number }[] = [];
   let orders: Awaited<ReturnType<typeof prisma.order.findMany>> = [];
 
   try {
-    [products, orders] = await Promise.all([
+    [products, productRows, orders] = await Promise.all([
       prisma.product.count({ where: { active: true } }),
+      prisma.product.findMany({
+        select: { id: true, price: true, costPrice: true, stock: true },
+      }),
       prisma.order.findMany({ orderBy: { createdAt: "desc" } }),
     ]);
   } catch {
@@ -20,6 +24,7 @@ export default async function AdminPage() {
   }
 
   const stats = computeDashboardStats(orders);
+  const profit = computeProfitStats(orders, productRows);
   const recent = orders.slice(0, 8);
 
   return (
@@ -29,7 +34,25 @@ export default async function AdminPage() {
         Resumo de pedidos e vendas da loja.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-5">
+          <p className="text-xs uppercase tracking-wider text-emerald-800">Lucro realizado</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-900">
+            {formatCurrency(profit.realizedProfit)}
+          </p>
+          <p className="mt-1 text-xs text-emerald-800">
+            Margem dos produtos em vendas confirmadas (liberados + concluídos)
+          </p>
+        </div>
+        <div className="rounded-md border border-blue-200 bg-blue-50 p-5">
+          <p className="text-xs uppercase tracking-wider text-blue-800">Projeção de lucro</p>
+          <p className="mt-2 text-2xl font-semibold text-blue-900">
+            {formatCurrency(profit.projectedProfit)}
+          </p>
+          <p className="mt-1 text-xs text-blue-800">
+            {profit.stockUnits} un. em estoque · {formatCurrency(profit.stockRetailValue)} em venda
+          </p>
+        </div>
         <div className="rounded-md border border-neutral-200 bg-white p-5">
           <p className="text-xs uppercase tracking-wider text-neutral-500">Vendas confirmadas</p>
           <p className="mt-2 text-2xl font-semibold">{formatCurrency(stats.confirmedSalesTotal)}</p>

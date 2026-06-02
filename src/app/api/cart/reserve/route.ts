@@ -129,6 +129,7 @@ export async function POST(req: Request) {
               productId: row.product.id,
               name: row.product.name,
               price: row.product.price,
+              unitCost: row.product.costPrice,
               quantity: row.quantity,
               waitlistQty: row.waitlistQty,
             }))

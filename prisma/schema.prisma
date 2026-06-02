@@ -13,6 +13,7 @@ model Product {
   slug        String   @unique
   description String
   price       Float
+  costPrice   Float    @default(0)
   compareAt   Float?
   category    String
   images      String   @default("[]")
