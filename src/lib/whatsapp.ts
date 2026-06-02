@@ -103,6 +103,8 @@ export function buildWhatsAppMessage(params: WhatsAppOrderParams): string {
       ? params.paymentProofUrl
       : `${params.siteUrl}${params.paymentProofUrl}`;
     lines.push("", `*Comprovante:* ${proofUrl}`);
+  } else {
+    lines.push("", "📎 Vou anexar o comprovante do PIX aqui nesta conversa.");
   }
 
   lines.push("", "_Enviado pelo site Zwei Brüder_");

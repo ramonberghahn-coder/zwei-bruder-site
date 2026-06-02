@@ -34,7 +34,6 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payment, setPayment] = useState<PaymentData | null>(null);
-  const [proofFile, setProofFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
@@ -150,23 +149,16 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
 
   async function sendWhatsApp() {
     if (!payment) return;
-    if (!proofFile) {
-      setError("Envie o comprovante de pagamento antes de continuar.");
-      return;
-    }
 
     const preOpened = window.open("", "_blank");
     setSending(true);
     setError(null);
     try {
-      const form = new FormData();
-      form.append("proof", proofFile);
       const res = await fetch(`/api/orders/${payment.orderNumber}/proof`, {
         method: "POST",
-        body: form,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Falha ao enviar comprovante.");
+      if (!res.ok) throw new Error(data.error || "Falha ao abrir WhatsApp.");
 
       setWhatsappUrl(data.whatsappUrl);
       setStage("done");
@@ -195,7 +187,8 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
       <div className="container py-16 text-center md:py-24">
         <h1 className="font-display text-4xl font-medium">Pedido enviado!</h1>
         <p className="mt-3 text-sm text-neutral-600">
-          Pedido <strong>{payment?.orderNumber}</strong> registrado. Se o WhatsApp não abriu
+          Pedido <strong>{payment?.orderNumber}</strong> registrado. No WhatsApp,{" "}
+          <strong>anexe o print do comprovante</strong> do PIX para concluir. Se a conversa não abriu
           automaticamente, use o botão abaixo.
         </p>
         <div className="mx-auto mt-8 flex max-w-xs flex-col gap-3">
@@ -347,16 +340,14 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
               </div>
 
               <div className="mt-8 max-w-md">
-                <p className="text-sm font-medium">Comprovante de pagamento</p>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  className="input mt-2"
-                  onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-                />
-                <p className="mt-1 text-xs text-neutral-500">
-                  Após enviar, o WhatsApp abre com o resumo do pedido e o link do comprovante.
-                </p>
+                <p className="text-sm font-medium">Como concluir</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-neutral-600">
+                  <li>Pague o valor pelo PIX (QR Code ou copia e cola acima).</li>
+                  <li>Clique em &quot;Enviar pedido no WhatsApp&quot;.</li>
+                  <li>
+                    Na conversa que abrir, <strong>anexe o print do comprovante</strong> do PIX.
+                  </li>
+                </ol>
               </div>
 
               {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
@@ -610,10 +601,10 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
               <button
                 type="button"
                 className="btn btn-primary mt-6 w-full"
-                disabled={sending || !proofFile}
+                disabled={sending}
                 onClick={sendWhatsApp}
               >
-                {sending ? "Enviando..." : "Enviar pedido no WhatsApp"}
+                {sending ? "Abrindo..." : "Enviar pedido no WhatsApp"}
               </button>
             )}
           </div>
