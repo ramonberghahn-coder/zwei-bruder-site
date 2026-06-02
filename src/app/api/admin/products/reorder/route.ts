@@ -10,6 +10,20 @@ export async function POST(req: Request) {
 
   try {
     await assertDatabase();
+
+    const body = await req.json().catch(() => null);
+    if (body && Array.isArray(body.ids)) {
+      const ids = body.ids.filter((v: unknown): v is string => typeof v === "string");
+      for (let i = 0; i < ids.length; i++) {
+        await prisma.product.update({
+          where: { id: ids[i] },
+          data: { sortOrder: i },
+        });
+      }
+      revalidatePath("/");
+      return NextResponse.json({ ok: true });
+    }
+
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     const direction = url.searchParams.get("direction");
