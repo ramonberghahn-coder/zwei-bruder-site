@@ -5,6 +5,27 @@ import { getSettings } from "@/lib/settings";
 import { buildPixPayload, generatePixQrDataUrl } from "@/lib/pix";
 import { generateOrderNumber } from "@/lib/utils";
 
+// Neon (pooler) pode derrubar a sessão WebSocket ("Connection terminated
+// unexpectedly"). Reexecuta operações que falham por motivos transitórios.
+async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < tries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const msg = error instanceof Error ? error.message : "";
+      const transient =
+        /terminated unexpectedly|connection|econnreset|fetch failed|socket hang up|timeout/i.test(
+          msg
+        );
+      if (!transient || attempt === tries - 1) throw error;
+      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 const reserveSchema = z.object({
   customerName: z.string().min(2),
   customerPhone: z.string().min(8),
@@ -36,9 +57,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Carrinho vazio" }, { status: 400 });
     }
 
-    const products = await prisma.product.findMany({
-      where: { id: { in: body.items.map((i) => i.productId) }, active: true },
-    });
+    const products = await withRetry(() =>
+      prisma.product.findMany({
+        where: { id: { in: body.items.map((i) => i.productId) }, active: true },
+      })
+    );
 
     const itemRows = body.items.map((item) => {
       const product = products.find((p) => p.id === item.productId);
@@ -88,17 +111,12 @@ export async function POST(req: Request) {
       pixPayload = (settings.pixCopyPaste || "").trim();
     }
 
-    const order = await prisma.$transaction(async (tx) => {
-      for (const row of itemRows) {
-        if (row.decrementQty > 0) {
-          await tx.product.update({
-            where: { id: row.product.id },
-            data: { stock: { decrement: row.decrementQty } },
-          });
-        }
-      }
-
-      return tx.order.create({
+    // Sem transação interativa: o adaptador Neon roteia estas queries por HTTP
+    // (poolQueryViaFetch), evitando a sessão WebSocket que cai no Render free.
+    // Cria o pedido primeiro; se um decremento de estoque falhar, o pedido
+    // continua registrado para o admin reconciliar.
+    const order = await withRetry(() =>
+      prisma.order.create({
         data: {
           orderNumber,
           customerName: body.customerName,
@@ -126,8 +144,19 @@ export async function POST(req: Request) {
           status: hasWaitlist ? "waitlist" : "reserved",
           pixPayload,
         },
-      });
-    });
+      })
+    );
+
+    for (const row of itemRows) {
+      if (row.decrementQty > 0) {
+        await withRetry(() =>
+          prisma.product.update({
+            where: { id: row.product.id },
+            data: { stock: { decrement: row.decrementQty } },
+          })
+        );
+      }
+    }
 
     const qrDataUrl = useDynamicQr
       ? await generatePixQrDataUrl(pixPayload)
