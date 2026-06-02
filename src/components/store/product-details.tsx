@@ -23,15 +23,31 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const images = product.images.length ? product.images : [""];
+  const images = product.images.filter((u) => u.trim());
+  const hasGallery = images.length > 1;
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const safeActive = images.length ? Math.min(active, images.length - 1) : 0;
   const image = productImageUrl(images[0]);
-  const mainImage = productImageUrl(images[active]);
+  const mainImage = productImageUrl(images[safeActive] ?? images[0]);
   const waitlist = isWaitlist(product.stock);
   const maxQty = maxOrderQty(product.stock);
+
+  function goToImage(index: number) {
+    if (!images.length) return;
+    setActive(((index % images.length) + images.length) % images.length);
+    setZoomed(false);
+  }
+
+  function goPrev() {
+    goToImage(safeActive - 1);
+  }
+
+  function goNext() {
+    goToImage(safeActive + 1);
+  }
 
   function openLightbox() {
     setZoomed(false);
@@ -56,6 +72,9 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
     if (!lightboxOpen) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") closeLightbox();
+      if (!hasGallery || zoomed) return;
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
     }
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -63,7 +82,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [lightboxOpen]);
+  }, [lightboxOpen, hasGallery, zoomed, safeActive, images.length]);
   const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || "");
   useEffect(() => {
     if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
@@ -94,31 +113,64 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   return (
     <div className="container page-y grid gap-12 md:grid-cols-2 md:gap-16">
       <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={openLightbox}
-          className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-[10px] bg-[#f7f4f0]"
-          aria-label="Ampliar imagem"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={mainImage}
-            alt={product.name}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-          <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
-            Ampliar
-          </span>
-        </button>
-        {images.length > 1 ? (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={openLightbox}
+            className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-[10px] bg-[#f7f4f0]"
+            aria-label="Ampliar imagem"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mainImage}
+              alt={product.name}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+              Ampliar
+            </span>
+            {hasGallery ? (
+              <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white">
+                {safeActive + 1} / {images.length}
+              </span>
+            ) : null}
+          </button>
+          {hasGallery ? (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goPrev();
+                }}
+                className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow hover:bg-white"
+                aria-label="Foto anterior"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goNext();
+                }}
+                className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow hover:bg-white"
+                aria-label="Próxima foto"
+              >
+                ›
+              </button>
+            </>
+          ) : null}
+        </div>
+        {hasGallery ? (
           <div className="flex flex-wrap gap-2">
             {images.map((img, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => setActive(i)}
+                onClick={() => goToImage(i)}
                 className={`relative h-16 w-16 overflow-hidden rounded-md bg-[#f7f4f0] ring-2 transition ${
-                  i === active ? "ring-neutral-900" : "ring-transparent hover:ring-neutral-300"
+                  i === safeActive ? "ring-neutral-900" : "ring-transparent hover:ring-neutral-300"
                 }`}
                 aria-label={`Ver imagem ${i + 1}`}
               >
@@ -211,6 +263,26 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
             className="relative flex h-[min(88vh,920px)] w-[min(92vw,720px)] max-h-[92vh] max-w-[92vw] items-center justify-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            {hasGallery && !zoomed ? (
+              <>
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  className="absolute left-0 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-2xl text-white hover:bg-white/25"
+                  aria-label="Foto anterior"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="absolute right-0 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-2xl text-white hover:bg-white/25"
+                  aria-label="Próxima foto"
+                >
+                  ›
+                </button>
+              </>
+            ) : null}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={mainImage}
@@ -229,20 +301,21 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
             />
           </div>
           <p className="mt-4 text-xs uppercase tracking-wider text-white/70">
-            {zoomed ? "Clique para voltar ao tamanho grande" : "Clique na imagem para ampliar detalhes"}
+            {zoomed
+              ? "Clique para voltar ao tamanho grande"
+              : hasGallery
+                ? "Setas ou miniaturas para trocar · clique para zoom"
+                : "Clique na imagem para ampliar detalhes"}
           </p>
-          {images.length > 1 ? (
+          {hasGallery ? (
             <div className="mt-4 flex flex-wrap justify-center gap-2" onClick={(e) => e.stopPropagation()}>
               {images.map((img, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => {
-                    setActive(i);
-                    setZoomed(false);
-                  }}
+                  onClick={() => goToImage(i)}
                   className={`relative h-14 w-14 overflow-hidden rounded-md ring-2 transition ${
-                    i === active ? "ring-white" : "ring-transparent opacity-60 hover:opacity-100"
+                    i === safeActive ? "ring-white" : "ring-transparent opacity-60 hover:opacity-100"
                   }`}
                   aria-label={`Ver imagem ${i + 1}`}
                 >

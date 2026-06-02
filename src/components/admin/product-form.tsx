@@ -25,6 +25,8 @@ function splitImages(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+const MAX_PRODUCT_IMAGES = 12;
+
 function imageLabel(url: string): string {
   if (url.startsWith("data:")) return "Imagem enviada";
   return url.length > 40 ? `${url.slice(0, 40)}…` : url;
@@ -47,10 +49,16 @@ export default function ProductForm({
   const [images, setImages] = useState<string[]>(splitImages(initial?.images));
   const [urlInput, setUrlInput] = useState("");
 
-  function addImage(url: string) {
+  function addImage(url: string): boolean {
     const trimmed = url.trim();
-    if (!trimmed) return;
-    setImages((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
+    if (!trimmed) return false;
+    let added = false;
+    setImages((prev) => {
+      if (prev.includes(trimmed) || prev.length >= MAX_PRODUCT_IMAGES) return prev;
+      added = true;
+      return [...prev, trimmed];
+    });
+    return added;
   }
 
   function removeImage(index: number) {
@@ -77,29 +85,75 @@ export default function ProductForm({
     });
   }
 
-  async function handleUploadImage(file: File | null) {
-    if (!file) return;
+  async function uploadOneFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await adminFetch("/api/admin/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Falha no upload da imagem.");
+    return data.url as string;
+  }
+
+  async function handleUploadFiles(fileList: FileList | null) {
+    if (!fileList?.length) return;
+
+    const slotsLeft = MAX_PRODUCT_IMAGES - images.length;
+    if (slotsLeft <= 0) {
+      setMessage(`Limite de ${MAX_PRODUCT_IMAGES} fotos por produto.`);
+      setIsError(true);
+      return;
+    }
+
+    const files = Array.from(fileList).slice(0, slotsLeft);
     setUploading(true);
     setMessage(null);
     setIsError(false);
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const res = await adminFetch("/api/admin/upload-image", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Falha no upload da imagem.");
-      addImage(data.url);
-      setMessage("Imagem adicionada.");
-      setIsError(false);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Erro ao enviar imagem.");
-      setIsError(true);
-    } finally {
-      setUploading(false);
+
+    const uploaded: string[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      setMessage(
+        files.length > 1 ? `Enviando foto ${i + 1} de ${files.length}…` : "Enviando foto…"
+      );
+      try {
+        uploaded.push(await uploadOneFile(files[i]));
+      } catch (error) {
+        errors.push(
+          error instanceof Error ? error.message : `Erro na foto ${i + 1}.`
+        );
+      }
     }
+
+    let added = 0;
+    if (uploaded.length > 0) {
+      setImages((prev) => {
+        const next = [...prev];
+        for (const url of uploaded) {
+          if (next.length >= MAX_PRODUCT_IMAGES || next.includes(url)) continue;
+          next.push(url);
+          added++;
+        }
+        return next;
+      });
+    }
+
+    if (added > 0) {
+      setMessage(
+        added === 1
+          ? "1 foto adicionada."
+          : `${added} fotos adicionadas.${errors.length ? ` ${errors.length} falhou(aram).` : ""}`
+      );
+      setIsError(errors.length > 0);
+    } else if (errors.length) {
+      setMessage(errors[0]);
+      setIsError(true);
+    }
+
+    setUploading(false);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -259,7 +313,11 @@ export default function ProductForm({
       </div>
 
       <div className="space-y-3 border border-neutral-200 p-4">
-        <p className="text-sm font-medium">Imagens do produto</p>
+        <p className="text-sm font-medium">Fotos do produto</p>
+        <p className="text-xs text-neutral-500">
+          Adicione quantas fotos quiser (até {MAX_PRODUCT_IMAGES}). A primeira é a capa na loja;
+          as demais aparecem na galeria da página do produto.
+        </p>
 
         {images.length > 0 ? (
           <>
@@ -331,20 +389,27 @@ export default function ProductForm({
         )}
 
         <div>
-          <label className="block text-sm font-medium">Enviar imagem (JPG/PNG/WEBP, até 2MB)</label>
+          <label className="block text-sm font-medium">
+            Enviar fotos (JPG/PNG/WEBP, até 2MB cada)
+          </label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            multiple
             className="input mt-2"
-            disabled={uploading}
+            disabled={uploading || images.length >= MAX_PRODUCT_IMAGES}
             onChange={(e) => {
-              handleUploadImage(e.target.files?.[0] || null);
+              handleUploadFiles(e.target.files);
               e.target.value = "";
             }}
           />
           <p className="mt-1 text-xs text-neutral-600">
-            A imagem é salva junto do produto no banco e fica permanente.
+            Selecione várias de uma vez ou envie uma por vez. Para muitas fotos grandes, prefira
+            URL externa.
           </p>
+          {images.length >= MAX_PRODUCT_IMAGES ? (
+            <p className="mt-1 text-xs text-amber-800">Limite de fotos atingido.</p>
+          ) : null}
         </div>
 
         <div>
@@ -360,9 +425,20 @@ export default function ProductForm({
             <button
               type="button"
               className="btn btn-secondary"
+              disabled={images.length >= MAX_PRODUCT_IMAGES}
               onClick={() => {
-                addImage(urlInput);
+                if (!addImage(urlInput)) {
+                  setMessage(
+                    images.length >= MAX_PRODUCT_IMAGES
+                      ? `Limite de ${MAX_PRODUCT_IMAGES} fotos.`
+                      : "URL inválida ou já adicionada."
+                  );
+                  setIsError(true);
+                  return;
+                }
                 setUrlInput("");
+                setMessage("Foto adicionada por URL.");
+                setIsError(false);
               }}
             >
               Adicionar
