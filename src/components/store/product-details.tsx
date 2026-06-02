@@ -150,7 +150,9 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
             </>
           )}
         </div>
-        <p className="mt-6 text-sm leading-relaxed text-neutral-600">{product.description}</p>
+        <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-neutral-600">
+          {product.description}
+        </p>
 
         {waitlist ? (
           <>
