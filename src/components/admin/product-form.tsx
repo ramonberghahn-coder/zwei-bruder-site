@@ -210,21 +210,26 @@ export default function ProductForm({
         <label className="text-xs text-neutral-500">Categoria</label>
         {categories.length > 0 ? (
           <>
-            <input
+            <select
               name="category"
               className="input mt-1"
-              placeholder="Selecione ou digite uma categoria"
-              defaultValue={initial?.category}
-              list="category-options"
+              defaultValue={initial?.category || ""}
               required
-            />
-            <datalist id="category-options">
+            >
+              <option value="" disabled>
+                Selecione uma categoria
+              </option>
+              {initial?.category && !categories.includes(initial.category) ? (
+                <option value={initial.category}>{initial.category} (atual)</option>
+              ) : null}
               {categories.map((c) => (
-                <option key={c} value={c} />
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
-            </datalist>
+            </select>
             <p className="mt-1 text-xs text-neutral-500">
-              Crie e edite categorias na aba &quot;Categorias&quot;.
+              Crie novas categorias na aba &quot;Categorias&quot;.
             </p>
           </>
         ) : (
