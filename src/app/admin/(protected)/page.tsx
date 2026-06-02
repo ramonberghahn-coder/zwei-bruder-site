@@ -120,17 +120,6 @@ export default async function AdminPage() {
         )}
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-3">
-        <Link href="/admin/pedidos" className="btn btn-primary">
-          Gerenciar pedidos
-        </Link>
-        <Link href="/admin/produtos" className="btn btn-secondary">
-          Gerenciar produtos
-        </Link>
-        <Link href="/admin/configuracoes" className="btn btn-secondary">
-          Configurações
-        </Link>
-      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSessionSafe } from "@/lib/session";
+import AdminNav from "@/components/admin/admin-nav";
 import AdminLogoutButton from "@/components/admin/logout-button";
 import DatabaseBanner from "@/components/admin/database-banner";
+import { getSessionSafe } from "@/lib/session";
 
 export default async function ProtectedAdminLayout({
   children,
@@ -17,27 +18,11 @@ export default async function ProtectedAdminLayout({
   return (
     <>
       <DatabaseBanner />
-      <header className="border-b border-neutral-200">
-        <div className="container flex h-14 items-center justify-between">
-          <nav className="flex items-center gap-5 text-sm text-neutral-600">
-            <Link href="/admin" className="hover:text-black">
-              Início
-            </Link>
-            <Link href="/admin/produtos" className="hover:text-black">
-              Produtos
-            </Link>
-            <Link href="/admin/categorias" className="hover:text-black">
-              Categorias
-            </Link>
-            <Link href="/admin/pedidos" className="hover:text-black">
-              Pedidos
-            </Link>
-            <Link href="/admin/configuracoes" className="hover:text-black">
-              Configurações
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-neutral-600 hover:text-black">
+      <header className="border-b border-neutral-200 bg-white">
+        <div className="container flex flex-col gap-4 py-4 md:flex-row md:items-center md:justify-between">
+          <AdminNav />
+          <div className="flex items-center gap-2">
+            <Link href="/" className="btn btn-secondary !py-2.5 !px-4">
               Ver loja
             </Link>
             <AdminLogoutButton />

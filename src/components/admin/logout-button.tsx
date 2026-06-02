@@ -12,7 +12,7 @@ export default function AdminLogoutButton() {
   }
 
   return (
-    <button type="button" className="text-neutral-600 hover:text-black" onClick={logout}>
+    <button type="button" className="btn btn-secondary !py-2.5 !px-4" onClick={logout}>
       Sair
     </button>
   );
