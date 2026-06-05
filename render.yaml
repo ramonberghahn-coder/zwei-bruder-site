@@ -30,3 +30,7 @@ services:
         sync: false
       - key: WOOCOMMERCE_CONSUMER_SECRET
         sync: false
+      - key: WORDPRESS_MEDIA_USER
+        sync: false
+      - key: WORDPRESS_MEDIA_APP_PASSWORD
+        sync: false

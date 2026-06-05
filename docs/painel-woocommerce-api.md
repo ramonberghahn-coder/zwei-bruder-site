@@ -17,10 +17,13 @@ WooCommerce via REST API.
 - Produto ativo/inativo
 - Produto em destaque
 - Peso
-- Fotos por URL
+- Fotos por upload ou URL
 
-As fotos continuam usando o upload externo configurado no app, como Cloudinary.
-O WooCommerce recebe apenas as URLs.
+Se `WORDPRESS_MEDIA_USER` e `WORDPRESS_MEDIA_APP_PASSWORD` estiverem
+configurados, os uploads do painel são enviados para a **Biblioteca de Mídia do
+WordPress** na KingHost. O WooCommerce recebe a URL pública dessa mídia.
+
+Se essas variáveis não existirem, o painel tenta usar Cloudinary.
 
 ## O que ainda fica no WooCommerce/WordPress
 
@@ -50,6 +53,21 @@ Guarde:
 - `Consumer key`
 - `Consumer secret`
 
+## Criar senha de aplicativo para uploads no WordPress
+
+Para salvar fotos direto na KingHost/WordPress:
+
+1. No WordPress, acesse **Usuários → Perfil**.
+2. Role até **Senhas de aplicativo**.
+3. Nome da senha: `Painel Zwei Bruder`.
+4. Clique em **Adicionar nova senha de aplicativo**.
+5. Copie a senha gerada.
+
+Guarde:
+
+- Nome do usuário WordPress.
+- Senha de aplicativo gerada.
+
 ## Variáveis na Render
 
 No serviço da Render que roda o painel antigo, configure:
@@ -58,6 +76,8 @@ No serviço da Render que roda o painel antigo, configure:
 WOOCOMMERCE_URL=https://www.zweibruder.com.br
 WOOCOMMERCE_CONSUMER_KEY=ck_...
 WOOCOMMERCE_CONSUMER_SECRET=cs_...
+WORDPRESS_MEDIA_USER=usuario-admin-wordpress
+WORDPRESS_MEDIA_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
 ```
 
 Mantenha também:
@@ -65,10 +85,9 @@ Mantenha também:
 ```txt
 ADMIN_PASSWORD=...
 SESSION_SECRET=...
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_UPLOAD_PRESET=...
-CLOUDINARY_UPLOAD_FOLDER=zwei-bruder-store
 ```
+
+Cloudinary passa a ser opcional se `WORDPRESS_MEDIA_*` estiver configurado.
 
 Depois faça **Manual Deploy** na Render.
 

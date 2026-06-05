@@ -17,6 +17,20 @@ type CloudinaryUploadResponse = {
   };
 };
 
+type WordPressMediaConfig = {
+  url: string;
+  user: string;
+  appPassword: string;
+};
+
+type WordPressMediaResponse = {
+  source_url?: unknown;
+  guid?: {
+    rendered?: unknown;
+  };
+  message?: unknown;
+};
+
 export class ImageStorageConfigError extends Error {
   constructor(message: string) {
     super(message);
@@ -24,9 +38,33 @@ export class ImageStorageConfigError extends Error {
   }
 }
 
+function storageConfigError(): ImageStorageConfigError {
+  return new ImageStorageConfigError(
+    [
+      "Upload externo não configurado.",
+      "Para salvar no WordPress/KingHost, defina WOOCOMMERCE_URL, WORDPRESS_MEDIA_USER e WORDPRESS_MEDIA_APP_PASSWORD.",
+      "Ou configure Cloudinary com CLOUDINARY_CLOUD_NAME e CLOUDINARY_UPLOAD_PRESET (preset unsigned) ou CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET.",
+    ].join(" ")
+  );
+}
+
 function envValue(name: string): string | undefined {
   const value = process.env[name]?.trim();
   return value || undefined;
+}
+
+function getWordPressMediaConfig(): WordPressMediaConfig | null {
+  const url = envValue("WORDPRESS_MEDIA_URL") || envValue("WOOCOMMERCE_URL");
+  const user = envValue("WORDPRESS_MEDIA_USER");
+  const appPassword = envValue("WORDPRESS_MEDIA_APP_PASSWORD");
+
+  if (!url || !user || !appPassword) return null;
+
+  return {
+    url: url.replace(/\/+$/, ""),
+    user,
+    appPassword,
+  };
 }
 
 function getCloudinaryConfig(): CloudinaryConfig {
@@ -36,15 +74,11 @@ function getCloudinaryConfig(): CloudinaryConfig {
   const apiSecret = envValue("CLOUDINARY_API_SECRET");
 
   if (!cloudName) {
-    throw new ImageStorageConfigError(
-      "Upload externo não configurado. Defina CLOUDINARY_CLOUD_NAME e CLOUDINARY_UPLOAD_PRESET (preset unsigned) ou CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET."
-    );
+    throw storageConfigError();
   }
 
   if (!uploadPreset && (!apiKey || !apiSecret)) {
-    throw new ImageStorageConfigError(
-      "Upload externo não configurado. Defina CLOUDINARY_UPLOAD_PRESET (preset unsigned) ou CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET."
-    );
+    throw storageConfigError();
   }
 
   return {
@@ -54,6 +88,68 @@ function getCloudinaryConfig(): CloudinaryConfig {
     apiSecret,
     folder: envValue("CLOUDINARY_UPLOAD_FOLDER") || DEFAULT_CLOUDINARY_FOLDER,
   };
+}
+
+function sanitizeFilename(name: string, mimeType: string): string {
+  const fallbackExtension = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  const base = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (!base) return `imagem-${Date.now()}.${fallbackExtension}`;
+  if (base.includes(".")) return base;
+  return `${base}.${fallbackExtension}`;
+}
+
+function wordpressAuthHeader(config: WordPressMediaConfig): string {
+  return `Basic ${Buffer.from(`${config.user}:${config.appPassword}`).toString("base64")}`;
+}
+
+function wordpressMediaUrl(payload: WordPressMediaResponse | undefined): string | undefined {
+  if (typeof payload?.source_url === "string") return payload.source_url;
+  if (typeof payload?.guid?.rendered === "string") return payload.guid.rendered;
+  return undefined;
+}
+
+async function uploadFileToWordPress(file: File): Promise<string> {
+  const config = getWordPressMediaConfig();
+  if (!config) throw storageConfigError();
+
+  const filename = sanitizeFilename(file.name, file.type);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const response = await fetch(`${config.url}/wp-json/wp/v2/media`, {
+    method: "POST",
+    headers: {
+      Authorization: wordpressAuthHeader(config),
+      "Content-Type": file.type,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    },
+    body: bytes,
+  });
+
+  let payload: WordPressMediaResponse | undefined;
+  try {
+    payload = (await response.json()) as WordPressMediaResponse;
+  } catch {
+    payload = undefined;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      typeof payload?.message === "string"
+        ? payload.message
+        : `Falha ao enviar imagem para o WordPress (HTTP ${response.status}).`
+    );
+  }
+
+  const url = wordpressMediaUrl(payload);
+  if (!url || !url.startsWith("http")) {
+    throw new Error("WordPress não retornou uma URL pública para a imagem.");
+  }
+
+  return url;
 }
 
 function signCloudinaryParams(
@@ -130,6 +226,10 @@ async function uploadToCloudinary(source: File | string): Promise<string> {
 }
 
 export async function uploadImageFileToStorage(file: File): Promise<string> {
+  if (getWordPressMediaConfig()) {
+    return uploadFileToWordPress(file);
+  }
+
   return uploadToCloudinary(file);
 }
 
