@@ -22,8 +22,18 @@ export function normalizeDatabaseUrl(raw: string): string {
 
   try {
     const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
-    if (isNeon && !parsed.searchParams.has("sslmode")) {
+    const isSupabase = parsed.hostname.endsWith(".supabase.com");
+    const isSupabaseTransactionPooler =
+      parsed.hostname.includes("pooler.supabase.com") && parsed.port === "6543";
+
+    if ((isNeon || isSupabase) && !parsed.searchParams.has("sslmode")) {
       parsed.searchParams.set("sslmode", "require");
+    }
+    if (isSupabaseTransactionPooler && !parsed.searchParams.has("pgbouncer")) {
+      parsed.searchParams.set("pgbouncer", "true");
+    }
+    if (isSupabaseTransactionPooler && !parsed.searchParams.has("connection_limit")) {
+      parsed.searchParams.set("connection_limit", "1");
     }
     if (!parsed.searchParams.has("connect_timeout")) {
       parsed.searchParams.set("connect_timeout", "30");
@@ -172,6 +182,9 @@ export function databaseUrlDiagnostics(): string[] {
 
   if (effective.includes("supabase.co") && !effective.includes("pooler.supabase.com")) {
     hints.push("No Supabase: Project Settings → Database → Connection string → Connection pooling. Copie a URL Session pooler ou Transaction pooler.");
+  }
+  if (effective.includes("pooler.supabase.com:6543") && !effective.includes("pgbouncer=true")) {
+    hints.push("Supabase Transaction Pooler detectado: o app adiciona pgbouncer=true automaticamente para o Prisma.");
   }
 
   if (!direct && url.includes("neon.tech") && !url.includes("-pooler")) {

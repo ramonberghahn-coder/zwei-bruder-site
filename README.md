@@ -82,6 +82,9 @@ Abra http://localhost:3000.
   use **Project Settings → Database → Connection string → Connection pooling** e
   copie a URL **Session pooler** ou **Transaction pooler**. Ela normalmente usa
   host `...pooler.supabase.com` e funciona melhor em hosts como a Render.
+- Se usar a URL **Transaction pooler** do Supabase na porta `6543`, adicione
+  `?pgbouncer=true` ao final (ou `&pgbouncer=true` se a URL já tiver `?`).
+  O app também normaliza isso automaticamente para o Prisma em runtime.
 - Para migrar imagens antigas que ainda estejam salvas como `data:image/...` no
   banco, configure as variáveis do Cloudinary e rode:
 
