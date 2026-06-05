@@ -38,20 +38,62 @@ export function normalizeDatabaseUrl(raw: string): string {
   }
 }
 
+function databaseUrlHasPassword(raw: string): boolean {
+  const url = sanitizeEnvUrl(raw);
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
+    return Boolean(parsed.password);
+  } catch {
+    return false;
+  }
+}
+
+function databaseUrlSourceName(source: string): string {
+  return source === "DATABASE_URL" ? "DATABASE_URL" : "DIRECT_DATABASE_URL";
+}
+
+function pickDatabaseUrl(
+  candidates: Array<{ source: "DATABASE_URL" | "DIRECT_DATABASE_URL"; raw: string }>
+): { source: "DATABASE_URL" | "DIRECT_DATABASE_URL"; raw: string } | undefined {
+  const present = candidates.filter((candidate) => candidate.raw);
+  if (present.length === 0) return undefined;
+
+  return present.find((candidate) => databaseUrlHasPassword(candidate.raw)) || present[0];
+}
+
 export function getAppDatabaseUrl(): string | undefined {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
-  const raw = direct || pooled;
-  if (!raw) return undefined;
-  return normalizeDatabaseUrl(raw);
+  const selected = pickDatabaseUrl([
+    { source: "DIRECT_DATABASE_URL", raw: direct },
+    { source: "DATABASE_URL", raw: pooled },
+  ]);
+  if (!selected) return undefined;
+  return normalizeDatabaseUrl(selected.raw);
 }
 
 export function getHttpDatabaseUrl(): string | undefined {
+  return getHttpDatabaseConfig()?.url;
+}
+
+export function getHttpDatabaseConfig():
+  | { source: "DATABASE_URL" | "DIRECT_DATABASE_URL"; url: string; hasPassword: boolean }
+  | undefined {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
-  const raw = pooled || direct;
-  if (!raw) return undefined;
-  return normalizeDatabaseUrl(raw);
+  const selected = pickDatabaseUrl([
+    { source: "DATABASE_URL", raw: pooled },
+    { source: "DIRECT_DATABASE_URL", raw: direct },
+  ]);
+  if (!selected) return undefined;
+
+  return {
+    source: selected.source,
+    url: normalizeDatabaseUrl(selected.raw),
+    hasPassword: databaseUrlHasPassword(selected.raw),
+  };
 }
 
 export function parseDatabaseHost(url: string): string | null {
@@ -67,7 +109,12 @@ export function databaseUrlDiagnostics(): string[] {
   const hints: string[] = [];
   const url = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
-  const effective = direct || url;
+  const selected =
+    pickDatabaseUrl([
+      { source: "DIRECT_DATABASE_URL", raw: direct },
+      { source: "DATABASE_URL", raw: url },
+    ]) || null;
+  const effective = selected?.raw || "";
 
   if (!url && !direct) {
     hints.push("DATABASE_URL não está definida na Render.");
@@ -77,9 +124,25 @@ export function databaseUrlDiagnostics(): string[] {
   const host = effective ? parseDatabaseHost(normalizeDatabaseUrl(effective)) : null;
   if (host) {
     hints.push(`Host detectado: ${host}`);
+    if (selected) {
+      hints.push(`URL selecionada: ${databaseUrlSourceName(selected.source)}.`);
+    }
     if (host.includes("-pooler")) {
       hints.push("DATABASE_URL está no pooler do Neon; /api/setup usa o driver HTTP e não depende de prisma db push por TCP.");
     }
+  }
+
+  const missingPassword = [
+    { source: "DATABASE_URL", raw: url },
+    { source: "DIRECT_DATABASE_URL", raw: direct },
+  ]
+    .filter((candidate) => candidate.raw && !databaseUrlHasPassword(candidate.raw))
+    .map((candidate) => databaseUrlSourceName(candidate.source));
+
+  if (missingPassword.length > 0) {
+    hints.push(
+      `${missingPassword.join(" e ")} sem senha. Copie a connection string completa do Neon, no formato postgresql://usuario:SENHA@host/neondb?sslmode=require.`
+    );
   }
 
   if (

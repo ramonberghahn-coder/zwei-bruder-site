@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { getHttpDatabaseUrl } from "@/lib/database-url";
+import { getHttpDatabaseConfig } from "@/lib/database-url";
 
 async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
   let lastError: unknown;
@@ -21,12 +21,17 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
 }
 
 export async function ensureDatabaseSchema(): Promise<void> {
-  const url = getHttpDatabaseUrl();
-  if (!url) {
+  const config = getHttpDatabaseConfig();
+  if (!config) {
     throw new Error("DATABASE_URL não configurada na Render.");
   }
+  if (!config.hasPassword) {
+    throw new Error(
+      `${config.source} está sem senha. Copie a connection string completa do Neon, incluindo usuário e senha.`
+    );
+  }
 
-  const sql = neon(url);
+  const sql = neon(config.url);
 
   await withRetry(() => sql`SELECT 1`);
 

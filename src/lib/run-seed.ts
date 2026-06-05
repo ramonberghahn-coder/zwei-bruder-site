@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
-import { getHttpDatabaseUrl } from "@/lib/database-url";
+import { getHttpDatabaseConfig } from "@/lib/database-url";
 
 // O Neon free pode estar suspenso na primeira requisição ("fetch failed").
 // Reexecuta operações que falham por motivos transitórios de conexão.
@@ -30,12 +30,17 @@ function rowCountValue(row: unknown): number {
 }
 
 export async function countProducts(): Promise<number> {
-  const url = getHttpDatabaseUrl();
-  if (!url) {
+  const config = getHttpDatabaseConfig();
+  if (!config) {
     throw new Error("DATABASE_URL não configurada na Render.");
   }
+  if (!config.hasPassword) {
+    throw new Error(
+      `${config.source} está sem senha. Copie a connection string completa do Neon, incluindo usuário e senha.`
+    );
+  }
 
-  const sql = neon(url);
+  const sql = neon(config.url);
   const rows = await withRetry(() => sql`SELECT COUNT(*)::int AS count FROM "Product"`);
   return rowCountValue(rows[0]);
 }
@@ -45,12 +50,17 @@ export async function countProducts(): Promise<number> {
  * sem sessão WebSocket nem transação que possa cair no host -pooler.
  */
 export async function runSeed(): Promise<{ productCount: number }> {
-  const url = getHttpDatabaseUrl();
-  if (!url) {
+  const config = getHttpDatabaseConfig();
+  if (!config) {
     throw new Error("DATABASE_URL não configurada na Render.");
   }
+  if (!config.hasPassword) {
+    throw new Error(
+      `${config.source} está sem senha. Copie a connection string completa do Neon, incluindo usuário e senha.`
+    );
+  }
 
-  const sql = neon(url);
+  const sql = neon(config.url);
 
   // Acorda o banco (free tier) antes dos inserts.
   await withRetry(() => sql`SELECT 1`);
