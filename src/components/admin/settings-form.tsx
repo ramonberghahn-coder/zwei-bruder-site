@@ -10,21 +10,49 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
+  const [qrUploading, setQrUploading] = useState(false);
   const [pixQrImage, setPixQrImage] = useState(initial.pixQrImage || "");
   const [storeName, setStoreName] = useState(initial.storeName);
   const [aboutText, setAboutText] = useState(initial.aboutText || "");
 
-  function handleQrUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 1_500_000) {
-      setMessage("A imagem do QR Code é muito grande (máx. ~1,5 MB).");
-      setIsError(true);
-      return;
+  async function uploadQrFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await adminFetch("/api/admin/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error(await readAdminError(res));
+
+    const data = await res.json();
+    if (typeof data?.url !== "string") {
+      throw new Error("Upload concluído, mas a URL da imagem não foi retornada.");
     }
-    const reader = new FileReader();
-    reader.onload = () => setPixQrImage(String(reader.result || ""));
-    reader.readAsDataURL(file);
+
+    return data.url;
+  }
+
+  async function handleQrUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setQrUploading(true);
+    setMessage("Enviando QR Code...");
+    setIsError(false);
+
+    try {
+      setPixQrImage(await uploadQrFile(file));
+      setMessage("QR Code enviado para o armazenamento externo.");
+      setIsError(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Erro ao enviar QR Code.");
+      setIsError(true);
+    } finally {
+      setQrUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -140,8 +168,9 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
 
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="input mt-3 bg-white"
+          disabled={qrUploading}
           onChange={handleQrUpload}
         />
 
@@ -239,8 +268,8 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
           </p>
         </div>
       </div>
-      <button type="submit" className="btn btn-primary" disabled={saving}>
-        {saving ? "Salvando..." : "Salvar configurações"}
+      <button type="submit" className="btn btn-primary" disabled={saving || qrUploading}>
+        {saving ? "Salvando..." : qrUploading ? "Enviando QR..." : "Salvar configurações"}
       </button>
       {message ? (
         <p className={`text-sm ${isError ? "text-red-600" : "text-green-700"}`}>{message}</p>

@@ -18,3 +18,9 @@ services:
         generateValue: true
       - key: ADMIN_PASSWORD
         sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_UPLOAD_PRESET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_FOLDER
+        value: zwei-bruder-store

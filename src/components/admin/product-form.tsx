@@ -404,8 +404,8 @@ export default function ProductForm({
             }}
           />
           <p className="mt-1 text-xs text-neutral-600">
-            Selecione várias de uma vez ou envie uma por vez. Para muitas fotos grandes, prefira
-            URL externa.
+            Selecione várias de uma vez ou envie uma por vez. As fotos enviadas ficam no
+            armazenamento externo, e o produto salva apenas a URL.
           </p>
           {images.length >= MAX_PRODUCT_IMAGES ? (
             <p className="mt-1 text-xs text-amber-800">Limite de fotos atingido.</p>

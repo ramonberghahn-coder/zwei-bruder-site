@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth-admin";
+import { uploadImageFileToStorage } from "@/lib/image-storage";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-// Imagem vira data URL salva no banco junto do produto (persiste na Render Free).
-// Limite menor para manter o registro do produto leve.
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 
 export async function POST(req: Request) {
@@ -32,10 +31,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const bytes = Buffer.from(await image.arrayBuffer());
-    const dataUrl = `data:${image.type};base64,${bytes.toString("base64")}`;
+    const url = await uploadImageFileToStorage(image);
 
-    return NextResponse.json({ url: dataUrl });
+    return NextResponse.json({ url });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Erro no upload da imagem." },

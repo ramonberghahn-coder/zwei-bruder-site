@@ -18,7 +18,8 @@ E-commerce para marca de facas e acessórios em couro, com visual limpo inspirad
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
-- Prisma + PostgreSQL (Neon)
+- Prisma + PostgreSQL (Neon ou outro Postgres)
+- Cloudinary para armazenamento externo de imagens
 
 ## Como rodar
 
@@ -32,14 +33,23 @@ npm install
 
 4. Configure `DATABASE_URL` no `.env` (Neon/Postgres).
 
-5. Gere banco e seed:
+5. Configure o Cloudinary para upload das imagens:
+
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_UPLOAD_PRESET` com um preset unsigned
+   - `CLOUDINARY_UPLOAD_FOLDER` opcional (padrão sugerido: `zwei-bruder-store`)
+
+   Alternativamente, use upload assinado com `CLOUDINARY_API_KEY` e
+   `CLOUDINARY_API_SECRET` no lugar do preset unsigned.
+
+6. Gere banco e seed:
 
 ```bash
 npm run db:push
 npm run db:seed
 ```
 
-6. Rode em desenvolvimento:
+7. Rode em desenvolvimento:
 
 ```bash
 npm run dev
@@ -57,6 +67,16 @@ Abra http://localhost:3000.
 
 ## Observações
 
+- Os uploads de imagens do painel admin são enviados ao Cloudinary e o banco salva
+  apenas a URL HTTPS. Isso evita guardar base64/imagem dentro do Neon.
+- Para migrar imagens antigas que ainda estejam salvas como `data:image/...` no
+  banco, configure as variáveis do Cloudinary e rode:
+
+```bash
+npm run images:migrate-to-cloudinary -- --dry-run
+npm run images:migrate-to-cloudinary
+```
+
 - O upload de comprovante é salvo em `public/uploads`.
 - Configure `NEXT_PUBLIC_SITE_URL` corretamente em produção para que o link do comprovante chegue completo no WhatsApp.
 
@@ -71,6 +91,9 @@ Abra http://localhost:3000.
    - `NEXT_PUBLIC_SITE_URL=https://SEU-DOMINIO.onrender.com`
    - `ADMIN_PASSWORD` com uma senha forte para o painel
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_UPLOAD_PRESET`
+   - `CLOUDINARY_UPLOAD_FOLDER=zwei-bruder-store`
 6. Rode o primeiro deploy.
 
 7. Após ficar **Live**, abra uma vez no navegador:
@@ -78,5 +101,12 @@ Abra http://localhost:3000.
 `https://SEU-SITE.onrender.com/api/setup?token=SUA_ADMIN_PASSWORD`
 
 Isso cria as tabelas no Neon e carrega os dados iniciais.
+
+8. Se já existirem imagens antigas gravadas no Neon como base64, rode a migração
+   uma vez com as variáveis do Cloudinary configuradas:
+
+```bash
+npm run images:migrate-to-cloudinary
+```
 
 > O build não depende mais do banco (evita falha de deploy). A configuração do banco é feita nesse passo único.
