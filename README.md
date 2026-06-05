@@ -147,6 +147,18 @@ veja o guia:
 docs/migracao-wordpress-kinghost.md
 ```
 
+O tema WordPress/WooCommerce da marca fica em:
+
+```txt
+wordpress/zwei-bruder-theme
+```
+
+Instruções de instalação:
+
+```txt
+docs/tema-wordpress-zwei-bruder.md
+```
+
 Para exportar produtos atuais em CSV compatível com WooCommerce:
 
 ```bash

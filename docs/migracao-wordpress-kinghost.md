@@ -31,7 +31,36 @@ Opcional:
 - Plugin de SEO.
 - Plugin de cache, se a KingHost recomendar.
 
-## 3. Configurar WooCommerce
+## 3. Instalar o tema Zwei Bruder
+
+Este repositório inclui um tema WordPress/WooCommerce em:
+
+```txt
+wordpress/zwei-bruder-theme
+```
+
+Para gerar o ZIP:
+
+```bash
+cd wordpress
+zip -r zwei-bruder-theme.zip zwei-bruder-theme
+```
+
+No WordPress:
+
+1. Acesse **Aparência → Temas**.
+2. Clique em **Adicionar novo**.
+3. Clique em **Enviar tema**.
+4. Envie `zwei-bruder-theme.zip`.
+5. Ative o tema **Zwei Bruder**.
+
+Mais detalhes em:
+
+```txt
+docs/tema-wordpress-zwei-bruder.md
+```
+
+## 4. Configurar WooCommerce
 
 Em **WooCommerce → Configurações**:
 
@@ -41,7 +70,7 @@ Em **WooCommerce → Configurações**:
 - Frete: configurar retirada/entrega conforme a operação.
 - Pagamentos: configurar PIX.
 
-## 4. Exportar produtos do site atual
+## 5. Exportar produtos do site atual
 
 Com `DATABASE_URL` apontando para o banco atual, rode:
 
@@ -75,7 +104,7 @@ O CSV usa colunas do importador nativo do WooCommerce:
 As URLs em `Images` precisam estar públicas. Se as imagens já estiverem no
 Cloudinary, o WooCommerce consegue baixá-las durante a importação.
 
-## 5. Importar produtos no WooCommerce
+## 6. Importar produtos no WooCommerce
 
 No WordPress:
 
@@ -93,9 +122,9 @@ Depois revise:
 - Categorias.
 - Produtos sob encomenda.
 
-## 6. Recriar páginas e identidade visual
+## 7. Recriar páginas e identidade visual
 
-O WordPress não reaproveita automaticamente o layout Next.js. Será necessário:
+O tema incluso já entrega uma base visual parecida. Ainda será necessário:
 
 - Escolher um tema.
 - Configurar logo, cores e fontes.
@@ -103,7 +132,7 @@ O WordPress não reaproveita automaticamente o layout Next.js. Será necessário
 - Criar páginas institucionais.
 - Configurar menus, rodapé e links de WhatsApp/Instagram.
 
-## 7. Dados que não migram automaticamente
+## 8. Dados que não migram automaticamente
 
 O exportador atual cobre produtos. Estes itens precisam ser recriados ou
 avaliados manualmente:
@@ -115,7 +144,7 @@ avaliados manualmente:
 - Usuários/admins.
 - Regras de frete e retirada.
 
-## 8. Virada final do domínio
+## 9. Virada final do domínio
 
 Quando o WordPress estiver revisado:
 
