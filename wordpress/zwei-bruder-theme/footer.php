@@ -34,22 +34,6 @@ if (!defined('ABSPATH')) {
                         <a href="mailto:<?php echo esc_attr(zwei_bruder_theme_option('zwei_bruder_contact_email')); ?>"><?php echo esc_html(zwei_bruder_theme_option('zwei_bruder_contact_email')); ?></a>
                     <?php endif; ?>
                 </div>
-                <div class="zb-footer-menu">
-                    <?php
-                    if (has_nav_menu('footer')) {
-                        wp_nav_menu([
-                            'theme_location' => 'footer',
-                            'container' => false,
-                            'depth' => 1,
-                        ]);
-                    } else {
-                        wp_list_pages([
-                            'title_li' => '',
-                            'depth' => 1,
-                        ]);
-                    }
-                    ?>
-                </div>
                 <?php if (is_active_sidebar('footer')) : ?>
                     <div class="zb-footer-widgets">
                         <?php dynamic_sidebar('footer'); ?>

@@ -75,6 +75,20 @@ img {
   gap: clamp(1rem, 2vw, 2rem);
 }
 
+.zb-menu-list {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zb-menu-list li {
+  margin: 0;
+  padding: 0;
+}
+
 .zb-header-actions {
   justify-content: flex-end;
 }
@@ -87,6 +101,15 @@ img {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.zb-nav a::before,
+.zb-header-actions a::before {
+  content: "•";
+  margin-right: 0.65rem;
+  color: var(--zb-foreground);
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 .zb-nav a:hover,

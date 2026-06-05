@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
                     'theme_location' => 'primary',
                     'container' => false,
                     'fallback_cb' => false,
-                    'items_wrap' => '%3$s',
+                    'items_wrap' => '<ul class="zb-menu-list">%3$s</ul>',
                     'depth' => 1,
                 ]);
                 ?>

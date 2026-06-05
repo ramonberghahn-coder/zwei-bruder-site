@@ -124,13 +124,25 @@ function zwei_bruder_add_menu_item(int $menu_id, string $title, string $url): vo
     ]);
 }
 
+function zwei_bruder_remove_menu_items_by_title(int $menu_id, array $titles): void
+{
+    $items = wp_get_nav_menu_items($menu_id) ?: [];
+    $normalized_titles = array_map('strtolower', $titles);
+
+    foreach ($items as $item) {
+        if (in_array(strtolower($item->title), $normalized_titles, true)) {
+            wp_delete_post((int) $item->ID, true);
+        }
+    }
+}
+
 function zwei_bruder_run_initial_setup(): void
 {
     if (!current_user_can('manage_options')) {
         return;
     }
 
-    $setup_version = '1.1.0';
+    $setup_version = '1.2.0';
     if (get_option('zwei_bruder_setup_version') === $setup_version) {
         return;
     }
@@ -164,8 +176,8 @@ function zwei_bruder_run_initial_setup(): void
     }
 
     if ($primary_menu_id > 0) {
+        zwei_bruder_remove_menu_items_by_title($primary_menu_id, ['Contato']);
         zwei_bruder_add_menu_item($primary_menu_id, 'Produtos', zwei_bruder_shop_url());
-        zwei_bruder_add_menu_item($primary_menu_id, 'Contato', zwei_bruder_contact_url());
         $locations['primary'] = $primary_menu_id;
     }
 
@@ -177,11 +189,7 @@ function zwei_bruder_run_initial_setup(): void
     }
 
     if ($footer_menu_id > 0) {
-        zwei_bruder_add_menu_item($footer_menu_id, 'Loja', zwei_bruder_shop_url());
-        if (function_exists('wc_get_page_permalink')) {
-            zwei_bruder_add_menu_item($footer_menu_id, 'Minha conta', wc_get_page_permalink('myaccount'));
-        }
-        zwei_bruder_add_menu_item($footer_menu_id, 'Contato', zwei_bruder_contact_url());
+        zwei_bruder_remove_menu_items_by_title($footer_menu_id, ['Loja', 'Minha conta', 'Contato']);
         $locations['footer'] = $footer_menu_id;
     }
 
