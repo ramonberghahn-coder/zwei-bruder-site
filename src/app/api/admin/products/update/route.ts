@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth-admin";
 import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
 import { prisma } from "@/lib/prisma";
+import { isWooCommerceConfigured, updateWooProduct } from "@/lib/woocommerce";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -23,12 +24,18 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   try {
-    await assertDatabase();
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
 
     const body = schema.parse(await req.json());
+
+    if (isWooCommerceConfigured()) {
+      await updateWooProduct(id, body);
+      return NextResponse.json({ ok: true });
+    }
+
+    await assertDatabase();
     const images = (body.images || "")
       .split("\n")
       .map((v) => v.trim())

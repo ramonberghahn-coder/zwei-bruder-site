@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth-admin";
 import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
 import { prisma } from "@/lib/prisma";
+import { createWooProduct, isWooCommerceConfigured } from "@/lib/woocommerce";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -24,8 +25,14 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   try {
-    await assertDatabase();
     const body = schema.parse(await req.json());
+
+    if (isWooCommerceConfigured()) {
+      const product = await createWooProduct(body);
+      return NextResponse.json({ id: product.id });
+    }
+
+    await assertDatabase();
     const slugBase = slugify(body.name, { lower: true, strict: true });
     const slug = `${slugBase}-${Math.floor(Math.random() * 1000)}`;
     const images = (body.images || "")

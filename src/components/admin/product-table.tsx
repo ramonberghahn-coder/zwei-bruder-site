@@ -19,9 +19,11 @@ export type ProductRow = {
 export default function ProductTable({
   products,
   compact = false,
+  reorderable = true,
 }: {
   products: ProductRow[];
   compact?: boolean;
+  reorderable?: boolean;
 }) {
   const router = useRouter();
   const [rows, setRows] = useState<ProductRow[]>(products);
@@ -30,6 +32,7 @@ export default function ProductTable({
   const [saving, setSaving] = useState(false);
 
   async function persist(ordered: ProductRow[]) {
+    if (!reorderable) return;
     setSaving(true);
     const res = await adminFetch(`/api/admin/products/reorder`, {
       method: "POST",
@@ -47,6 +50,7 @@ export default function ProductTable({
   }
 
   function reorder(from: number, to: number) {
+    if (!reorderable) return;
     if (from === to || to < 0 || to >= rows.length) return;
     const next = [...rows];
     const [moved] = next.splice(from, 1);
@@ -64,7 +68,7 @@ export default function ProductTable({
 
   return (
     <>
-      {!compact ? (
+      {!compact && reorderable ? (
         <p className="mt-6 text-sm text-neutral-500">
           Arraste as linhas (pelo ícone <span className="font-medium">⠿</span>) para reordenar, ou use
           as setas. A ordem é aplicada na loja automaticamente.
@@ -76,7 +80,7 @@ export default function ProductTable({
         <table className="min-w-full text-sm">
           <thead className="bg-neutral-50 text-left uppercase tracking-wider text-neutral-600">
             <tr>
-              <th className="px-4 py-3">Ordem</th>
+              {reorderable ? <th className="px-4 py-3">Ordem</th> : null}
               <th className="px-4 py-3">Imagem</th>
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">Preço</th>
@@ -89,7 +93,7 @@ export default function ProductTable({
             {rows.map((p, i) => (
               <tr
                 key={p.id}
-                draggable
+                draggable={reorderable}
                 onDragStart={() => setDragIndex(i)}
                 onDragEnter={() => setOverIndex(i)}
                 onDragOver={(e) => e.preventDefault()}
@@ -102,38 +106,40 @@ export default function ProductTable({
                   dragIndex === i ? "opacity-50" : ""
                 } ${overIndex === i && dragIndex !== i ? "bg-blue-50" : ""}`}
               >
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="cursor-grab select-none text-lg leading-none text-neutral-400"
-                      title="Arraste para reordenar"
-                    >
-                      ⠿
-                    </span>
-                    <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        onClick={() => reorder(i, i - 1)}
-                        disabled={saving || i === 0}
-                        aria-label="Mover para cima"
-                        title="Mover para cima"
-                        className="flex h-5 w-5 items-center justify-center rounded border border-neutral-300 text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                {reorderable ? (
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="cursor-grab select-none text-lg leading-none text-neutral-400"
+                        title="Arraste para reordenar"
                       >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => reorder(i, i + 1)}
-                        disabled={saving || i === rows.length - 1}
-                        aria-label="Mover para baixo"
-                        title="Mover para baixo"
-                        className="flex h-5 w-5 items-center justify-center rounded border border-neutral-300 text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
-                      >
-                        ↓
-                      </button>
+                        ⠿
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          type="button"
+                          onClick={() => reorder(i, i - 1)}
+                          disabled={saving || i === 0}
+                          aria-label="Mover para cima"
+                          title="Mover para cima"
+                          className="flex h-5 w-5 items-center justify-center rounded border border-neutral-300 text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => reorder(i, i + 1)}
+                          disabled={saving || i === rows.length - 1}
+                          aria-label="Mover para baixo"
+                          title="Mover para baixo"
+                          className="flex h-5 w-5 items-center justify-center rounded border border-neutral-300 text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          ↓
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
+                ) : null}
                 <td className="px-4 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={p.image} alt={p.name} className="h-12 w-12 object-cover" />

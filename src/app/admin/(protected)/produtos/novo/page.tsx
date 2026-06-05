@@ -1,12 +1,12 @@
 import ProductForm from "@/components/admin/product-form";
-import { getCategories } from "@/lib/settings";
+import { listAdminCategories } from "@/lib/woocommerce";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewProductPage() {
   let categories: string[] = [];
   try {
-    categories = await getCategories();
+    categories = await listAdminCategories();
   } catch {
     categories = [];
   }

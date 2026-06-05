@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/product-form";
-import { prisma } from "@/lib/prisma";
-import { getCategories } from "@/lib/settings";
 import { parseImages } from "@/lib/utils";
+import { getAdminProduct, listAdminCategories } from "@/lib/woocommerce";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({ where: { id } });
+  const product = await getAdminProduct(id);
   if (!product) return notFound();
 
   let categories: string[] = [];
   try {
-    categories = await getCategories();
+    categories = await listAdminCategories();
   } catch {
     categories = [];
   }

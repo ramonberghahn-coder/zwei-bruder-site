@@ -24,3 +24,9 @@ services:
         sync: false
       - key: CLOUDINARY_UPLOAD_FOLDER
         value: zwei-bruder-store
+      - key: WOOCOMMERCE_URL
+        sync: false
+      - key: WOOCOMMERCE_CONSUMER_KEY
+        sync: false
+      - key: WOOCOMMERCE_CONSUMER_SECRET
+        sync: false

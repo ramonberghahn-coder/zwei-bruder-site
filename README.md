@@ -164,3 +164,10 @@ Para exportar produtos atuais em CSV compatível com WooCommerce:
 ```bash
 npm run wordpress:export-products
 ```
+
+Também é possível usar o painel `/admin` deste app para cadastrar produtos no
+WooCommerce via API. Veja:
+
+```txt
+docs/painel-woocommerce-api.md
+```
