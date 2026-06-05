@@ -67,8 +67,8 @@ export function getAppDatabaseUrl(): string | undefined {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
   const selected = pickDatabaseUrl([
-    { source: "DIRECT_DATABASE_URL", raw: direct },
     { source: "DATABASE_URL", raw: pooled },
+    { source: "DIRECT_DATABASE_URL", raw: direct },
   ]);
   if (!selected) return undefined;
   return normalizeDatabaseUrl(selected.raw);
@@ -111,8 +111,8 @@ export function databaseUrlDiagnostics(): string[] {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const selected =
     pickDatabaseUrl([
-      { source: "DIRECT_DATABASE_URL", raw: direct },
       { source: "DATABASE_URL", raw: url },
+      { source: "DIRECT_DATABASE_URL", raw: direct },
     ]) || null;
   const effective = selected?.raw || "";
 

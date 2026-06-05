@@ -72,6 +72,12 @@ Abra http://localhost:3000.
 - Se a loja aparecer sem produtos, abra `/api/health` e confira `productCount`
   e `activeProductCount`. Se `productCount` estiver `0`, rode novamente
   `/api/setup?token=SUA_ADMIN_PASSWORD` depois do deploy.
+- Se o Neon retornar `HTTP status 402` / `exceeded the data transfer quota`, o
+  projeto passou da cota do plano grátis. Nesse caso, o app não consegue criar
+  tabelas nem ler produtos nesse projeto até a cota resetar ou o plano ser
+  atualizado. Como alternativa grátis, crie um Postgres em outro provedor (por
+  exemplo Supabase Free), troque `DATABASE_URL` na Render para a nova connection
+  string, faça Manual Deploy e rode `/api/setup?token=SUA_ADMIN_PASSWORD`.
 - Para migrar imagens antigas que ainda estejam salvas como `data:image/...` no
   banco, configure as variáveis do Cloudinary e rode:
 
@@ -105,8 +111,8 @@ npm run images:migrate-to-cloudinary
 
 `https://SEU-SITE.onrender.com/api/setup?token=SUA_ADMIN_PASSWORD`
 
-Isso cria as tabelas no Neon via driver HTTP e carrega os dados iniciais, sem
-depender de `prisma db push` por conexão TCP.
+Isso cria as tabelas e carrega os dados iniciais. No Neon, o setup usa o driver
+HTTP; em outros Postgres, usa conexão normal via Prisma.
 
 8. Se já existirem imagens antigas gravadas no Neon como base64, rode a migração
    uma vez com as variáveis do Cloudinary configuradas:

@@ -10,6 +10,17 @@ const P1001_HELP = [
 ].join("\n");
 
 export function prismaErrorMessage(error: unknown): string {
+  if (error instanceof Error && /exceeded the data transfer quota|HTTP status 402/i.test(error.message)) {
+    const hints = databaseUrlDiagnostics();
+    const extra = hints.length ? `\n\n${hints.join("\n")}` : "";
+    return [
+      "O projeto Neon excedeu a cota de transferência do plano grátis.",
+      "Não é possível resolver isso pelo código enquanto esse projeto estiver bloqueado.",
+      "Opções: aguardar o reset da cota, fazer upgrade no Neon ou trocar DATABASE_URL para outro Postgres com cota disponível (ex.: Supabase Free).",
+      extra,
+    ].join("\n");
+  }
+
   if (error && typeof error === "object" && "code" in error) {
     const code = String((error as { code: string }).code);
     if (code === "P2021") {
