@@ -78,6 +78,10 @@ Abra http://localhost:3000.
   atualizado. Como alternativa grátis, crie um Postgres em outro provedor (por
   exemplo Supabase Free), troque `DATABASE_URL` na Render para a nova connection
   string, faça Manual Deploy e rode `/api/setup?token=SUA_ADMIN_PASSWORD`.
+- No Supabase, se a URL direta `db.<projeto>.supabase.co:5432` falhar na Render,
+  use **Project Settings → Database → Connection string → Connection pooling** e
+  copie a URL **Session pooler** ou **Transaction pooler**. Ela normalmente usa
+  host `...pooler.supabase.com` e funciona melhor em hosts como a Render.
 - Para migrar imagens antigas que ainda estejam salvas como `data:image/...` no
   banco, configure as variáveis do Cloudinary e rode:
 

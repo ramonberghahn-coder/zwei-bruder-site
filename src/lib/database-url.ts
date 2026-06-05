@@ -130,6 +130,11 @@ export function databaseUrlDiagnostics(): string[] {
     if (host.includes("-pooler")) {
       hints.push("DATABASE_URL está no pooler do Neon; /api/setup usa o driver HTTP e não depende de prisma db push por TCP.");
     }
+    if (host.startsWith("db.") && host.endsWith(".supabase.co")) {
+      hints.push(
+        "Host direto do Supabase detectado. Na Render, prefira a connection string de Connection Pooling do Supabase (host ...pooler.supabase.com), pois o host direto db.<projeto>.supabase.co:5432 pode não ser acessível."
+      );
+    }
   }
 
   const missingPassword = [
@@ -163,6 +168,10 @@ export function databaseUrlDiagnostics(): string[] {
     if (!effective.includes("sslmode=")) {
       hints.push("Inclua ?sslmode=require na URL.");
     }
+  }
+
+  if (effective.includes("supabase.co") && !effective.includes("pooler.supabase.com")) {
+    hints.push("No Supabase: Project Settings → Database → Connection string → Connection pooling. Copie a URL Session pooler ou Transaction pooler.");
   }
 
   if (!direct && url.includes("neon.tech") && !url.includes("-pooler")) {

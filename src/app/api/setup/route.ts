@@ -33,7 +33,7 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         error: prismaErrorMessage(error),
-        step: "schema_http",
+        step: "schema_setup",
         hints: databaseUrlDiagnostics(),
       },
       { status: 500 }
