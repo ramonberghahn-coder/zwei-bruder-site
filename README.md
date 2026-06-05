@@ -129,3 +129,11 @@ npm run images:migrate-to-cloudinary
 ```
 
 > O build não depende mais do banco (evita falha de deploy). A configuração do banco é feita nesse passo único.
+
+## Deploy na KingHost
+
+Para hospedar o app em um plano Node.js da KingHost, veja o guia:
+
+```txt
+docs/deploy-kinghost.md
+```
