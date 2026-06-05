@@ -23,12 +23,16 @@ export async function GET() {
 
   try {
     await assertDatabase(usesNeonDatabase() ? 5 : 3);
-    const productCount = await prisma.product.count();
+    const [productCount, activeProductCount] = await Promise.all([
+      prisma.product.count(),
+      prisma.product.count({ where: { active: true } }),
+    ]);
     return NextResponse.json({
       ok: true,
       database: "connected",
       driver: usesNeonDatabase() ? "neon-serverless" : "postgres-tcp",
       productCount,
+      activeProductCount,
       hints: databaseUrlDiagnostics(),
     });
   } catch (error) {

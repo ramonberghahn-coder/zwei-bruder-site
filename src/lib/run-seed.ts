@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { getAppDatabaseUrl } from "@/lib/database-url";
 
@@ -20,11 +21,30 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
   throw lastError;
 }
 
+function rowCountValue(row: unknown): number {
+  const count = (row as { count?: unknown } | undefined)?.count;
+  if (typeof count === "number") return count;
+  if (typeof count === "bigint") return Number(count);
+  if (typeof count === "string") return Number(count);
+  return 0;
+}
+
+export async function countProducts(): Promise<number> {
+  const url = getAppDatabaseUrl();
+  if (!url) {
+    throw new Error("DATABASE_URL não configurada na Render.");
+  }
+
+  const sql = neon(url);
+  const rows = await withRetry(() => sql`SELECT COUNT(*)::int AS count FROM "Product"`);
+  return rowCountValue(rows[0]);
+}
+
 /**
  * Seed via driver HTTP do Neon: cada statement é uma requisição independente,
  * sem sessão WebSocket nem transação que possa cair no host -pooler.
  */
-export async function runSeed(): Promise<void> {
+export async function runSeed(): Promise<{ productCount: number }> {
   const url = getAppDatabaseUrl();
   if (!url) {
     throw new Error("DATABASE_URL não configurada na Render.");
@@ -113,9 +133,11 @@ export async function runSeed(): Promise<void> {
         INSERT INTO "Product"
           (id, name, slug, description, price, "compareAt", category, images, stock, featured, active, "createdAt", "updatedAt")
         VALUES
-          (gen_random_uuid()::text, ${p.name}, ${p.slug}, ${p.description}, ${p.price}, ${p.compareAt}, ${p.category}, ${p.images}, ${p.stock}, ${p.featured}, ${p.active}, now(), now())
+          (${randomUUID()}, ${p.name}, ${p.slug}, ${p.description}, ${p.price}, ${p.compareAt}, ${p.category}, ${p.images}, ${p.stock}, ${p.featured}, ${p.active}, now(), now())
         ON CONFLICT (slug) DO NOTHING
       `
     );
   }
+
+  return { productCount: await countProducts() };
 }

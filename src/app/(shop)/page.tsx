@@ -12,12 +12,14 @@ export default async function HomePage({
   const { categoria } = await searchParams;
 
   let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let loadError = false;
   try {
     products = await prisma.product.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
   } catch {
+    loadError = true;
     products = [];
   }
 
@@ -69,7 +71,12 @@ export default async function HomePage({
         </div>
       ) : null}
 
-      {visibleProducts.length === 0 ? (
+      {loadError ? (
+        <p className="text-center text-sm text-neutral-500">
+          Não foi possível carregar o catálogo agora. Verifique a conexão do banco em
+          /api/health e rode /api/setup novamente se o banco estiver sem produtos.
+        </p>
+      ) : visibleProducts.length === 0 ? (
         <p className="text-center text-sm text-neutral-500">
           {products.length === 0
             ? "Nenhum produto cadastrado ainda."

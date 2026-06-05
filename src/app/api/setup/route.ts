@@ -5,7 +5,7 @@ import {
   getMigrateDatabaseUrl,
 } from "@/lib/database-url";
 import { prismaErrorMessage } from "@/lib/db-errors";
-import { runSeed } from "@/lib/run-seed";
+import { countProducts, runSeed } from "@/lib/run-seed";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -64,25 +64,39 @@ export async function GET(req: Request) {
 
   // O schema (db_push) já foi aplicado com sucesso neste ponto. O seed apenas
   // insere dados de exemplo (ON CONFLICT DO NOTHING), então uma falha aqui não
-  // é crítica — não bloqueia o uso do painel nem da loja.
+  // bloqueia dados existentes. Se o banco continuar sem produtos, a falha é
+  // crítica para a vitrine inicial e precisa aparecer no setup.
   try {
-    await runSeed();
+    const seedResult = await runSeed();
     return NextResponse.json({
       ok: true,
       schema: "updated",
       seed: "ok",
+      productCount: seedResult.productCount,
       message: "Banco atualizado e dados iniciais carregados com sucesso.",
       hints: databaseUrlDiagnostics(),
     });
   } catch (error) {
-    return NextResponse.json({
-      ok: true,
+    let productCount = 0;
+    try {
+      productCount = await countProducts();
+    } catch {
+      productCount = 0;
+    }
+
+    const body = {
+      ok: productCount > 0,
       schema: "updated",
       seed: "skipped",
+      productCount,
       seedError: prismaErrorMessage(error),
       message:
-        "Schema do banco atualizado com sucesso. O seed de dados de exemplo falhou (conexão instável), mas isso não afeta seus dados existentes. Você pode rodar /api/setup novamente mais tarde se quiser os exemplos.",
+        productCount > 0
+          ? "Schema do banco atualizado com sucesso. O seed de dados de exemplo falhou, mas já existem produtos cadastrados."
+          : "Schema do banco atualizado, mas o seed falhou e o banco continua sem produtos. Rode /api/setup novamente após corrigir o erro informado.",
       hints: databaseUrlDiagnostics(),
-    });
+    };
+
+    return NextResponse.json(body, { status: productCount > 0 ? 200 : 500 });
   }
 }

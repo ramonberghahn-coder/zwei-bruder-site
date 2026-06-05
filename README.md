@@ -69,6 +69,9 @@ Abra http://localhost:3000.
 
 - Os uploads de imagens do painel admin são enviados ao Cloudinary e o banco salva
   apenas a URL HTTPS. Isso evita guardar base64/imagem dentro do Neon.
+- Se a loja aparecer sem produtos, abra `/api/health` e confira `productCount`
+  e `activeProductCount`. Se `productCount` estiver `0`, rode novamente
+  `/api/setup?token=SUA_ADMIN_PASSWORD` depois do deploy.
 - Para migrar imagens antigas que ainda estejam salvas como `data:image/...` no
   banco, configure as variáveis do Cloudinary e rode:
 
