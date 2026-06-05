@@ -88,9 +88,12 @@ npm run images:migrate-to-cloudinary
 1. Faça push deste projeto para um repositório no GitHub.
 2. Na Render, clique em **New +** -> **Blueprint**.
 3. Conecte o repositório e selecione a branch principal.
-4. Crie um banco gratuito no Neon e copie a connection string **direct** (`postgresql://...` **sem** `-pooler` no host).
+4. Crie um banco gratuito no Neon e copie a connection string do Postgres. A URL
+   com `-pooler` pode ser usada em `DATABASE_URL`; para setup/migração o app
+   tenta derivar automaticamente o host Direct sem `-pooler`.
 5. Em **Environment**, configure:
-   - `DATABASE_URL` = connection string direct do Neon (obrigatório)
+   - `DATABASE_URL` = connection string do Neon/Postgres (obrigatório)
+   - `DIRECT_DATABASE_URL` = connection string Direct do Neon, sem `-pooler` (opcional, recomendado se o `/api/setup` falhar)
    - `NEXT_PUBLIC_SITE_URL=https://SEU-DOMINIO.onrender.com`
    - `ADMIN_PASSWORD` com uma senha forte para o painel
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
