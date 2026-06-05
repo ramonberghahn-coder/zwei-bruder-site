@@ -89,11 +89,10 @@ npm run images:migrate-to-cloudinary
 2. Na Render, clique em **New +** -> **Blueprint**.
 3. Conecte o repositório e selecione a branch principal.
 4. Crie um banco gratuito no Neon e copie a connection string do Postgres. A URL
-   com `-pooler` pode ser usada em `DATABASE_URL`; para setup/migração o app
-   tenta derivar automaticamente o host Direct sem `-pooler`.
+   com `-pooler` pode ser usada em `DATABASE_URL`.
 5. Em **Environment**, configure:
    - `DATABASE_URL` = connection string do Neon/Postgres (obrigatório)
-   - `DIRECT_DATABASE_URL` = connection string Direct do Neon, sem `-pooler` (opcional, recomendado se o `/api/setup` falhar)
+   - `DIRECT_DATABASE_URL` = connection string Direct do Neon, sem `-pooler` (opcional)
    - `NEXT_PUBLIC_SITE_URL=https://SEU-DOMINIO.onrender.com`
    - `ADMIN_PASSWORD` com uma senha forte para o painel
    - `SESSION_SECRET` (já pode ser gerada automaticamente)
@@ -106,7 +105,8 @@ npm run images:migrate-to-cloudinary
 
 `https://SEU-SITE.onrender.com/api/setup?token=SUA_ADMIN_PASSWORD`
 
-Isso cria as tabelas no Neon e carrega os dados iniciais.
+Isso cria as tabelas no Neon via driver HTTP e carrega os dados iniciais, sem
+depender de `prisma db push` por conexão TCP.
 
 8. Se já existirem imagens antigas gravadas no Neon como base64, rode a migração
    uma vez com as variáveis do Cloudinary configuradas:

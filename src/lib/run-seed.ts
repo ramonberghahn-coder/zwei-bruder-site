@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
-import { getAppDatabaseUrl } from "@/lib/database-url";
+import { getHttpDatabaseUrl } from "@/lib/database-url";
 
 // O Neon free pode estar suspenso na primeira requisição ("fetch failed").
 // Reexecuta operações que falham por motivos transitórios de conexão.
@@ -30,7 +30,7 @@ function rowCountValue(row: unknown): number {
 }
 
 export async function countProducts(): Promise<number> {
-  const url = getAppDatabaseUrl();
+  const url = getHttpDatabaseUrl();
   if (!url) {
     throw new Error("DATABASE_URL não configurada na Render.");
   }
@@ -45,7 +45,7 @@ export async function countProducts(): Promise<number> {
  * sem sessão WebSocket nem transação que possa cair no host -pooler.
  */
 export async function runSeed(): Promise<{ productCount: number }> {
-  const url = getAppDatabaseUrl();
+  const url = getHttpDatabaseUrl();
   if (!url) {
     throw new Error("DATABASE_URL não configurada na Render.");
   }

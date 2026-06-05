@@ -1,24 +1,11 @@
-import { execSync } from "child_process";
 import { NextResponse } from "next/server";
-import {
-  databaseUrlDiagnostics,
-  getMigrateDatabaseUrl,
-} from "@/lib/database-url";
+import { databaseUrlDiagnostics, getHttpDatabaseUrl } from "@/lib/database-url";
 import { prismaErrorMessage } from "@/lib/db-errors";
 import { countProducts, runSeed } from "@/lib/run-seed";
+import { ensureDatabaseSchema } from "@/lib/setup-schema";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-function commandErrorMessage(error: unknown): string {
-  if (error && typeof error === "object") {
-    const err = error as { stderr?: string; stdout?: string; message?: string };
-    const detail = [err.stderr, err.stdout].filter(Boolean).join("\n").trim();
-    if (detail) return detail.slice(0, 3000);
-    if (err.message) return err.message;
-  }
-  return prismaErrorMessage(error);
-}
 
 export async function GET(req: Request) {
   const token = new URL(req.url).searchParams.get("token");
@@ -28,44 +15,35 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const migrateUrl = getMigrateDatabaseUrl();
-  if (!migrateUrl) {
+  const databaseUrl = getHttpDatabaseUrl();
+  if (!databaseUrl) {
     return NextResponse.json(
       {
         error:
-          "DATABASE_URL não configurada na Render. Adicione a connection string Direct do Neon.",
+          "DATABASE_URL não configurada na Render. Adicione a connection string do Neon/Postgres.",
         hints: databaseUrlDiagnostics(),
       },
       { status: 500 }
     );
   }
 
-  const pushEnv = {
-    ...process.env,
-    DATABASE_URL: migrateUrl,
-  };
-
   try {
-    execSync("npx prisma db push", {
-      stdio: "pipe",
-      env: pushEnv,
-      encoding: "utf-8",
-    });
+    await ensureDatabaseSchema();
   } catch (error) {
     return NextResponse.json(
       {
-        error: commandErrorMessage(error),
-        step: "db_push",
+        error: prismaErrorMessage(error),
+        step: "schema_http",
         hints: databaseUrlDiagnostics(),
       },
       { status: 500 }
     );
   }
 
-  // O schema (db_push) já foi aplicado com sucesso neste ponto. O seed apenas
-  // insere dados de exemplo (ON CONFLICT DO NOTHING), então uma falha aqui não
-  // bloqueia dados existentes. Se o banco continuar sem produtos, a falha é
-  // crítica para a vitrine inicial e precisa aparecer no setup.
+  // O schema já foi aplicado com sucesso neste ponto. O seed apenas insere
+  // dados de exemplo (ON CONFLICT DO NOTHING), então uma falha aqui não bloqueia
+  // dados existentes. Se o banco continuar sem produtos, a falha é crítica para
+  // a vitrine inicial e precisa aparecer no setup.
   try {
     const seedResult = await runSeed();
     return NextResponse.json({

@@ -38,21 +38,6 @@ export function normalizeDatabaseUrl(raw: string): string {
   }
 }
 
-export function deriveNeonDirectUrl(raw: string): string {
-  const url = sanitizeEnvUrl(raw);
-  if (!url || !url.includes("neon.tech") || !url.includes("-pooler")) {
-    return url;
-  }
-
-  try {
-    const parsed = new URL(url.replace(/^postgres:\/\//, "postgresql://"));
-    parsed.hostname = parsed.hostname.replace(/-pooler(?=\.)/, "");
-    return parsed.toString();
-  } catch {
-    return url.replace("-pooler.", ".");
-  }
-}
-
 export function getAppDatabaseUrl(): string | undefined {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
@@ -61,10 +46,10 @@ export function getAppDatabaseUrl(): string | undefined {
   return normalizeDatabaseUrl(raw);
 }
 
-export function getMigrateDatabaseUrl(): string | undefined {
+export function getHttpDatabaseUrl(): string | undefined {
   const direct = sanitizeEnvUrl(process.env.DIRECT_DATABASE_URL ?? "");
   const pooled = sanitizeEnvUrl(process.env.DATABASE_URL ?? "");
-  const raw = direct || deriveNeonDirectUrl(pooled);
+  const raw = pooled || direct;
   if (!raw) return undefined;
   return normalizeDatabaseUrl(raw);
 }
@@ -92,15 +77,8 @@ export function databaseUrlDiagnostics(): string[] {
   const host = effective ? parseDatabaseHost(normalizeDatabaseUrl(effective)) : null;
   if (host) {
     hints.push(`Host detectado: ${host}`);
-    if (host.includes("-pooler") && direct) {
-      hints.push("DATABASE_URL está no pooler, mas DIRECT_DATABASE_URL será usado no /api/setup.");
-    } else if (host.includes("-pooler")) {
-      const migrateHost = parseDatabaseHost(normalizeDatabaseUrl(deriveNeonDirectUrl(effective)));
-      if (migrateHost && migrateHost !== host) {
-        hints.push(`Para /api/setup, o host Direct será derivado automaticamente: ${migrateHost}`);
-      } else {
-        hints.push("Use também DIRECT_DATABASE_URL com o host Direct (sem -pooler) para /api/setup.");
-      }
+    if (host.includes("-pooler")) {
+      hints.push("DATABASE_URL está no pooler do Neon; /api/setup usa o driver HTTP e não depende de prisma db push por TCP.");
     }
   }
 
@@ -125,7 +103,7 @@ export function databaseUrlDiagnostics(): string[] {
   }
 
   if (!direct && url.includes("neon.tech") && !url.includes("-pooler")) {
-    hints.push("Recomendado: defina DIRECT_DATABASE_URL com a URL Direct do Neon.");
+    hints.push("Opcional: defina DIRECT_DATABASE_URL se quiser separar a URL Direct da URL pooler.");
   }
 
   return hints;

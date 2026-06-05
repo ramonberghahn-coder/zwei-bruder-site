@@ -3,9 +3,9 @@ import { databaseUrlDiagnostics } from "./database-url";
 const P1001_HELP = [
   "A Render não consegue alcançar o servidor Postgres (Neon). Confira:",
   "1. No painel Neon: projeto ativo (não excluído) — abra o projeto para acordar se estiver suspenso.",
-  "2. Se DATABASE_URL tiver host com -pooler, o /api/setup tenta usar automaticamente o host Direct sem -pooler.",
-  "3. Se ainda falhar, crie DIRECT_DATABASE_URL na Render com a connection string PostgreSQL Direct do Neon.",
-  "4. Confirme que a URL completa tem ?sslmode=require.",
+  "2. O /api/setup da versão atual cria o schema via HTTP e não usa mais prisma db push por TCP.",
+  "3. Confirme que a URL completa tem ?sslmode=require.",
+  "4. No Neon → Settings: desative restrição de IP se estiver ativa.",
   "5. Salve, faça Manual Deploy e aguarde 1–2 min antes de chamar /api/setup novamente.",
 ].join("\n");
 
