@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
                 ]);
                 ?>
                 <?php if (!has_nav_menu('primary')) : ?>
-                    <a href="<?php echo esc_url(home_url('/loja/')); ?>"><?php esc_html_e('Produtos', 'zwei-bruder'); ?></a>
+                    <a href="<?php echo esc_url(zwei_bruder_shop_url()); ?>"><?php esc_html_e('Produtos', 'zwei-bruder'); ?></a>
                 <?php endif; ?>
             </nav>
 
@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) {
             </a>
 
             <div class="zb-header-actions">
-                <a href="<?php echo esc_url(home_url('/contato/')); ?>"><?php esc_html_e('Contato', 'zwei-bruder'); ?></a>
+                <a href="<?php echo esc_url(zwei_bruder_contact_url()); ?>"><?php esc_html_e('Contato', 'zwei-bruder'); ?></a>
                 <?php if (function_exists('wc_get_cart_url')) : ?>
                     <a href="<?php echo esc_url(wc_get_cart_url()); ?>"><?php esc_html_e('Carrinho', 'zwei-bruder'); ?></a>
                 <?php endif; ?>

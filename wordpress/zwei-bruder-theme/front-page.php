@@ -9,12 +9,12 @@ get_header();
     <div class="zb-container zb-hero-inner">
         <div>
             <p class="zb-eyebrow"><?php esc_html_e('Cutelaria artesanal', 'zwei-bruder'); ?></p>
-            <h1><?php esc_html_e('Facas e acessorios em couro feitos para durar.', 'zwei-bruder'); ?></h1>
+            <h1><?php echo esc_html(zwei_bruder_theme_option('zwei_bruder_hero_title', 'Facas e acessorios em couro feitos para durar.')); ?></h1>
             <p class="zb-hero-copy">
-                <?php esc_html_e('Pecas selecionadas com acabamento premium, linhas limpas e materiais pensados para acompanhar sua rotina por muitos anos.', 'zwei-bruder'); ?>
+                <?php echo esc_html(zwei_bruder_theme_option('zwei_bruder_hero_text', 'Pecas selecionadas com acabamento premium, linhas limpas e materiais pensados para acompanhar sua rotina por muitos anos.')); ?>
             </p>
             <p>
-                <a class="zb-button" href="<?php echo esc_url(home_url('/loja/')); ?>">
+                <a class="zb-button" href="<?php echo esc_url(zwei_bruder_shop_url()); ?>">
                     <?php esc_html_e('Ver produtos', 'zwei-bruder'); ?>
                 </a>
             </p>
@@ -36,7 +36,7 @@ get_header();
                 <p class="zb-eyebrow"><?php esc_html_e('Catalogo', 'zwei-bruder'); ?></p>
                 <h2 class="zb-section-title"><?php esc_html_e('Produtos em destaque', 'zwei-bruder'); ?></h2>
             </div>
-            <a href="<?php echo esc_url(home_url('/loja/')); ?>"><?php esc_html_e('Ver todos', 'zwei-bruder'); ?></a>
+            <a href="<?php echo esc_url(zwei_bruder_shop_url()); ?>"><?php esc_html_e('Ver todos', 'zwei-bruder'); ?></a>
         </div>
 
         <?php

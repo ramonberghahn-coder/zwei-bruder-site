@@ -244,6 +244,19 @@ img {
   text-transform: uppercase;
 }
 
+.zb-contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--zb-muted);
+  font-size: 0.95rem;
+}
+
+.zb-contact-links a:hover {
+  color: var(--zb-foreground);
+}
+
 .zb-footer-bottom {
   border-top: 1px solid var(--zb-border);
   padding: 1.5rem var(--zb-page-x);

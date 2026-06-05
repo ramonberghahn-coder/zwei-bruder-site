@@ -25,10 +25,39 @@ function zwei_bruder_assets(): void
         'zwei-bruder-theme',
         get_template_directory_uri() . '/assets/css/theme.css',
         [],
-        '1.0.0'
+        '1.1.0'
     );
 }
 add_action('wp_enqueue_scripts', 'zwei_bruder_assets');
+
+function zwei_bruder_theme_option(string $key, string $default = ''): string
+{
+    $value = get_theme_mod($key, $default);
+    return is_string($value) ? $value : $default;
+}
+
+function zwei_bruder_shop_url(): string
+{
+    if (function_exists('wc_get_page_permalink')) {
+        $shop_url = wc_get_page_permalink('shop');
+        if ($shop_url) {
+            return $shop_url;
+        }
+    }
+
+    return home_url('/loja/');
+}
+
+function zwei_bruder_contact_url(): string
+{
+    $whatsapp = zwei_bruder_theme_option('zwei_bruder_whatsapp_url');
+    if ($whatsapp) {
+        return $whatsapp;
+    }
+
+    $contact = get_page_by_path('contato');
+    return $contact ? get_permalink($contact) : home_url('/contato/');
+}
 
 function zwei_bruder_widgets(): void
 {
@@ -61,3 +90,164 @@ function zwei_bruder_woocommerce_loop_columns(): int
     return 4;
 }
 add_filter('loop_shop_columns', 'zwei_bruder_woocommerce_loop_columns');
+
+function zwei_bruder_create_page(string $title, string $slug, string $content = ''): int
+{
+    $existing = get_page_by_path($slug);
+    if ($existing instanceof WP_Post) {
+        return (int) $existing->ID;
+    }
+
+    return (int) wp_insert_post([
+        'post_title' => $title,
+        'post_name' => $slug,
+        'post_content' => $content,
+        'post_status' => 'publish',
+        'post_type' => 'page',
+    ]);
+}
+
+function zwei_bruder_add_menu_item(int $menu_id, string $title, string $url): void
+{
+    $items = wp_get_nav_menu_items($menu_id) ?: [];
+    foreach ($items as $item) {
+        if ($item->url === $url || $item->title === $title) {
+            return;
+        }
+    }
+
+    wp_update_nav_menu_item($menu_id, 0, [
+        'menu-item-title' => $title,
+        'menu-item-url' => $url,
+        'menu-item-status' => 'publish',
+        'menu-item-type' => 'custom',
+    ]);
+}
+
+function zwei_bruder_run_initial_setup(): void
+{
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $setup_version = '1.1.0';
+    if (get_option('zwei_bruder_setup_version') === $setup_version) {
+        return;
+    }
+
+    $home_id = zwei_bruder_create_page('Inicio', 'inicio');
+    zwei_bruder_create_page(
+        'Contato',
+        'contato',
+        "Fale conosco pelo WhatsApp, Instagram ou e-mail para tirar duvidas sobre produtos, pedidos e personalizacoes."
+    );
+
+    if ($home_id > 0) {
+        update_option('show_on_front', 'page');
+        update_option('page_on_front', $home_id);
+    }
+
+    if (!get_bloginfo('name') || get_bloginfo('name') === 'Meu site') {
+        update_option('blogname', 'Zwei Bruder');
+    }
+
+    if (!get_bloginfo('description')) {
+        update_option('blogdescription', 'Facas e acessorios em couro');
+    }
+
+    $locations = get_theme_mod('nav_menu_locations', []);
+    $primary_menu = wp_get_nav_menu_object('Menu principal');
+    if (!$primary_menu) {
+        $primary_menu_id = wp_create_nav_menu('Menu principal');
+    } else {
+        $primary_menu_id = (int) $primary_menu->term_id;
+    }
+
+    if ($primary_menu_id > 0) {
+        zwei_bruder_add_menu_item($primary_menu_id, 'Produtos', zwei_bruder_shop_url());
+        zwei_bruder_add_menu_item($primary_menu_id, 'Contato', zwei_bruder_contact_url());
+        $locations['primary'] = $primary_menu_id;
+    }
+
+    $footer_menu = wp_get_nav_menu_object('Menu do rodape');
+    if (!$footer_menu) {
+        $footer_menu_id = wp_create_nav_menu('Menu do rodape');
+    } else {
+        $footer_menu_id = (int) $footer_menu->term_id;
+    }
+
+    if ($footer_menu_id > 0) {
+        zwei_bruder_add_menu_item($footer_menu_id, 'Loja', zwei_bruder_shop_url());
+        if (function_exists('wc_get_page_permalink')) {
+            zwei_bruder_add_menu_item($footer_menu_id, 'Minha conta', wc_get_page_permalink('myaccount'));
+        }
+        zwei_bruder_add_menu_item($footer_menu_id, 'Contato', zwei_bruder_contact_url());
+        $locations['footer'] = $footer_menu_id;
+    }
+
+    set_theme_mod('nav_menu_locations', $locations);
+    update_option('zwei_bruder_setup_version', $setup_version);
+}
+add_action('after_switch_theme', 'zwei_bruder_run_initial_setup');
+add_action('admin_init', 'zwei_bruder_run_initial_setup');
+
+function zwei_bruder_customize_register(WP_Customize_Manager $wp_customize): void
+{
+    $wp_customize->add_section('zwei_bruder_brand', [
+        'title' => __('Zwei Bruder - textos e contato', 'zwei-bruder'),
+        'priority' => 30,
+    ]);
+
+    $settings = [
+        'zwei_bruder_hero_title' => [
+            'label' => __('Titulo da home', 'zwei-bruder'),
+            'default' => 'Facas e acessorios em couro feitos para durar.',
+            'sanitize' => 'sanitize_text_field',
+            'type' => 'text',
+        ],
+        'zwei_bruder_hero_text' => [
+            'label' => __('Texto da home', 'zwei-bruder'),
+            'default' => 'Pecas selecionadas com acabamento premium, linhas limpas e materiais pensados para acompanhar sua rotina por muitos anos.',
+            'sanitize' => 'sanitize_textarea_field',
+            'type' => 'textarea',
+        ],
+        'zwei_bruder_about_text' => [
+            'label' => __('Texto do rodape', 'zwei-bruder'),
+            'default' => 'Facas e acessorios em couro de alta qualidade. Cada peca e pensada para durar, com design limpo e materiais selecionados.',
+            'sanitize' => 'sanitize_textarea_field',
+            'type' => 'textarea',
+        ],
+        'zwei_bruder_whatsapp_url' => [
+            'label' => __('Link do WhatsApp', 'zwei-bruder'),
+            'default' => '',
+            'sanitize' => 'esc_url_raw',
+            'type' => 'url',
+        ],
+        'zwei_bruder_instagram_url' => [
+            'label' => __('Link do Instagram', 'zwei-bruder'),
+            'default' => '',
+            'sanitize' => 'esc_url_raw',
+            'type' => 'url',
+        ],
+        'zwei_bruder_contact_email' => [
+            'label' => __('E-mail de contato', 'zwei-bruder'),
+            'default' => '',
+            'sanitize' => 'sanitize_email',
+            'type' => 'email',
+        ],
+    ];
+
+    foreach ($settings as $key => $config) {
+        $wp_customize->add_setting($key, [
+            'default' => $config['default'],
+            'sanitize_callback' => $config['sanitize'],
+        ]);
+
+        $wp_customize->add_control($key, [
+            'label' => $config['label'],
+            'section' => 'zwei_bruder_brand',
+            'type' => $config['type'],
+        ]);
+    }
+}
+add_action('customize_register', 'zwei_bruder_customize_register');

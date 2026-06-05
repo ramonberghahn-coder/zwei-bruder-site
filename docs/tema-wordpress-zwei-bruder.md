@@ -42,7 +42,8 @@ No painel WordPress:
 
 ## Configurar a página inicial
 
-Depois de ativar o tema:
+O tema tenta criar automaticamente a página `Inicio`, configurar a home estática
+e criar menus básicos quando for ativado. Se precisar revisar manualmente:
 
 1. Vá em **Páginas → Adicionar nova**.
 2. Crie uma página chamada `Inicio`.
@@ -52,9 +53,30 @@ Depois de ativar o tema:
 
 O tema usa `front-page.php`, então a home personalizada aparece nessa página.
 
+## Ajustar textos e contatos
+
+No painel WordPress:
+
+1. Acesse **Aparência → Personalizar**.
+2. Abra **Zwei Bruder - textos e contato**.
+3. Configure:
+   - Título da home.
+   - Texto da home.
+   - Texto do rodapé.
+   - Link do WhatsApp.
+   - Link do Instagram.
+   - E-mail de contato.
+
+O link de WhatsApp pode ser neste formato:
+
+```txt
+https://wa.me/5547999999999
+```
+
 ## Configurar menus
 
-Em **Aparência → Menus**:
+O tema também tenta criar menus automaticamente. Para revisar, acesse
+**Aparência → Menus**:
 
 - Menu principal:
   - Loja
