@@ -12,6 +12,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:prod": "node prisma/seed.mjs",
     "images:migrate-to-cloudinary": "tsx scripts/migrate-images-to-cloudinary.ts",
+    "wordpress:export-products": "tsx scripts/export-woocommerce-products.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

@@ -137,3 +137,18 @@ Para hospedar o app em um plano Node.js da KingHost, veja o guia:
 ```txt
 docs/deploy-kinghost.md
 ```
+
+## Migração para WordPress/WooCommerce
+
+Se a ideia for usar a hospedagem WordPress da KingHost em vez do app Next.js,
+veja o guia:
+
+```txt
+docs/migracao-wordpress-kinghost.md
+```
+
+Para exportar produtos atuais em CSV compatível com WooCommerce:
+
+```bash
+npm run wordpress:export-products
+```
