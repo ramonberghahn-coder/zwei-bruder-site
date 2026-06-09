@@ -6,10 +6,10 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   const settings = await getSettings();
 
   return (
-    <>
+    <div className="shop-theme min-h-screen">
       <Header settings={settings} />
       <main className="min-h-[40vh]">{children}</main>
       <Footer settings={settings} />
-    </>
+    </div>
   );
 }

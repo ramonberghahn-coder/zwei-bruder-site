@@ -117,7 +117,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
           <button
             type="button"
             onClick={openLightbox}
-            className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden rounded-[10px] bg-[#f7f4f0]"
+            className="group relative aspect-[4/5] w-full cursor-zoom-in overflow-hidden bg-[#1a1816]"
             aria-label="Ampliar imagem"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,8 +169,8 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
                 key={i}
                 type="button"
                 onClick={() => goToImage(i)}
-                className={`relative h-16 w-16 overflow-hidden rounded-md bg-[#f7f4f0] ring-2 transition ${
-                  i === safeActive ? "ring-neutral-900" : "ring-transparent hover:ring-neutral-300"
+                className={`relative h-16 w-16 overflow-hidden bg-[#1a1816] ring-2 transition ${
+                  i === safeActive ? "ring-[#f4f0ea]" : "ring-transparent hover:ring-white/30"
                 }`}
                 aria-label={`Ver imagem ${i + 1}`}
               >
@@ -192,23 +192,23 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
         <h1 className="font-display mt-4 text-4xl font-medium leading-tight md:text-5xl">
           {product.name}
         </h1>
-        <div className="mt-6 border-t border-neutral-200 pt-6">
+        <div className="mt-6 border-t border-white/10 pt-6">
           {waitlist ? (
-            <p className="text-sm font-medium uppercase tracking-wider text-amber-700">Sob encomenda</p>
+            <p className="text-sm font-medium uppercase tracking-wider text-amber-400">Sob encomenda</p>
           ) : (
             <>
-              <p className="price-label">Preço normal</p>
-              <p className="mt-1 text-xl">{formatCurrency(product.price)}</p>
+              <p className="price-label text-[#9a9288]">Preço normal</p>
+              <p className="mt-1 text-xl text-[#f4f0ea]">{formatCurrency(product.price)}</p>
             </>
           )}
         </div>
-        <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-neutral-600">
+        <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-[#9a9288]">
           {product.description}
         </p>
 
         {waitlist ? (
           <>
-            <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
+            <p className="mt-6 inline-flex w-fit items-center gap-2 border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-200">
               Esgotado no momento — disponível <strong>sob encomenda</strong>. Combinamos o prazo no WhatsApp.
             </p>
             <div className="mt-8">

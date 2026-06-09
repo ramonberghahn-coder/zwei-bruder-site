@@ -36,12 +36,17 @@ export async function GET() {
       hints: databaseUrlDiagnostics(),
     });
   } catch (error) {
+    const message = prismaErrorMessage(error);
+    const quotaExceeded =
+      message.includes("cota de transferência") ||
+      message.toLowerCase().includes("data transfer quota");
     return NextResponse.json(
       {
         ok: false,
         database: "error",
         driver: usesNeonDatabase() ? "neon-serverless" : "postgres-tcp",
-        message: prismaErrorMessage(error),
+        message,
+        quotaExceeded,
         hints: databaseUrlDiagnostics(),
       },
       { status: 503 }

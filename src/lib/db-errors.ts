@@ -9,6 +9,15 @@ const DATABASE_CONNECTION_HELP = [
   "5. Salve, faça Manual Deploy e aguarde 1–2 min antes de chamar /api/setup novamente.",
 ].join("\n");
 
+function isNeonQuotaError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("data transfer quota") ||
+    lower.includes("exceeded the data transfer") ||
+    (lower.includes("402") && lower.includes("neon"))
+  );
+}
+
 export function prismaErrorMessage(error: unknown): string {
   if (error instanceof Error && /exceeded the data transfer quota|HTTP status 402/i.test(error.message)) {
     const hints = databaseUrlDiagnostics();
@@ -32,7 +41,16 @@ export function prismaErrorMessage(error: unknown): string {
       return `${DATABASE_CONNECTION_HELP}${extra}`;
     }
   }
-  if (error instanceof Error) return error.message;
+  if (error instanceof Error) {
+    if (isNeonQuotaError(error.message)) {
+      return [
+        "A cota de transferência do banco Neon foi esgotada — por isso os produtos não carregam.",
+        "No console Neon (neon.tech): abra o projeto, faça upgrade do plano ou aguarde o reset da cota.",
+        "Dica: use URLs de imagem em vez de upload pesado no painel para reduzir o consumo.",
+      ].join(" ");
+    }
+    return error.message;
+  }
   return "Erro no banco de dados.";
 }
 

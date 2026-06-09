@@ -1,0 +1,63 @@
+"use client";
+
+import { useRef } from "react";
+import ProductShowcaseCard, { type ShowcaseProduct } from "./product-showcase-card";
+
+export default function ProductCarousel({
+  title,
+  products,
+}: {
+  title: string;
+  products: ShowcaseProduct[];
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  if (products.length === 0) return null;
+
+  function scrollBy(direction: -1 | 1) {
+    const el = trackRef.current;
+    if (!el) return;
+    const amount = Math.min(el.clientWidth * 0.85, 420);
+    el.scrollBy({ left: direction * amount, behavior: "smooth" });
+  }
+
+  return (
+    <section className="mt-16 md:mt-20">
+      <div className="flex items-end justify-between gap-4">
+        <h2 className="font-display text-3xl font-medium md:text-4xl">{title}</h2>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => scrollBy(-1)}
+            className="flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
+            aria-label="Anterior"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollBy(1)}
+            className="flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
+            aria-label="Próximo"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={trackRef}
+        className="catalog-scroll mt-6 flex gap-1.5 overflow-x-auto pb-2 md:gap-2"
+      >
+        {products.map((product) => (
+          <div
+            key={product.slug}
+            className="w-[min(78vw,280px)] shrink-0 md:w-[min(32vw,300px)]"
+          >
+            <ProductShowcaseCard product={product} className="min-h-[300px] md:min-h-[360px]" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
