@@ -18,18 +18,8 @@ if (!defined('ABSPATH')) {
     <div class="zb-container">
         <div class="zb-header-inner">
             <nav class="zb-nav" aria-label="<?php esc_attr_e('Menu principal', 'zwei-bruder'); ?>">
-                <?php
-                wp_nav_menu([
-                    'theme_location' => 'primary',
-                    'container' => false,
-                    'fallback_cb' => false,
-                    'items_wrap' => '<ul class="zb-menu-list">%3$s</ul>',
-                    'depth' => 1,
-                ]);
-                ?>
-                <?php if (!has_nav_menu('primary')) : ?>
-                    <a href="<?php echo esc_url(zwei_bruder_shop_url()); ?>"><?php esc_html_e('Produtos', 'zwei-bruder'); ?></a>
-                <?php endif; ?>
+                <a href="<?php echo esc_url(zwei_bruder_shop_url()); ?>"><?php esc_html_e('Catalogo', 'zwei-bruder'); ?></a>
+                <a href="#contato"><?php esc_html_e('Contato', 'zwei-bruder'); ?></a>
             </nav>
 
             <a class="zb-brand" href="<?php echo esc_url(home_url('/')); ?>">
@@ -37,7 +27,6 @@ if (!defined('ABSPATH')) {
             </a>
 
             <div class="zb-header-actions">
-                <a href="<?php echo esc_url(zwei_bruder_contact_url()); ?>"><?php esc_html_e('Contato', 'zwei-bruder'); ?></a>
                 <?php if (function_exists('wc_get_cart_url')) : ?>
                     <a href="<?php echo esc_url(wc_get_cart_url()); ?>"><?php esc_html_e('Carrinho', 'zwei-bruder'); ?></a>
                 <?php endif; ?>

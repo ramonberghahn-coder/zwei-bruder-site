@@ -25,7 +25,7 @@ function zwei_bruder_assets(): void
         'zwei-bruder-theme',
         get_template_directory_uri() . '/assets/css/theme.css',
         [],
-        '1.1.0'
+        '1.3.0'
     );
 }
 add_action('wp_enqueue_scripts', 'zwei_bruder_assets');
@@ -90,6 +90,149 @@ function zwei_bruder_woocommerce_loop_columns(): int
     return 4;
 }
 add_filter('loop_shop_columns', 'zwei_bruder_woocommerce_loop_columns');
+
+function zwei_bruder_product_image_src(WC_Product $product, string $size = 'large'): string
+{
+    $image_id = $product->get_image_id();
+    if ($image_id) {
+        $src = wp_get_attachment_image_url($image_id, $size);
+        if ($src) {
+            return $src;
+        }
+    }
+
+    $gallery_ids = $product->get_gallery_image_ids();
+    if (!empty($gallery_ids)) {
+        $src = wp_get_attachment_image_url((int) $gallery_ids[0], $size);
+        if ($src) {
+            return $src;
+        }
+    }
+
+    return function_exists('wc_placeholder_img_src') ? wc_placeholder_img_src($size) : '';
+}
+
+function zwei_bruder_bento_tile_class(int $index): string
+{
+    $mod = $index % 6;
+    if ($mod === 0) {
+        return 'bento-tile-lg';
+    }
+    if ($mod === 3) {
+        return 'bento-tile-wide';
+    }
+    return 'bento-tile-md';
+}
+
+function zwei_bruder_product_primary_category(WC_Product $product): string
+{
+    $terms = get_the_terms($product->get_id(), 'product_cat');
+    if (is_array($terms) && isset($terms[0])) {
+        return $terms[0]->name;
+    }
+    return '';
+}
+
+function zwei_bruder_render_showcase_card(WC_Product $product, string $class = ''): void
+{
+    $category = zwei_bruder_product_primary_category($product);
+    $is_waitlist = !$product->is_in_stock();
+    ?>
+    <a href="<?php echo esc_url(get_permalink($product->get_id())); ?>" class="showcase-card group <?php echo esc_attr($class); ?>">
+        <img src="<?php echo esc_url(zwei_bruder_product_image_src($product)); ?>" alt="<?php echo esc_attr($product->get_name()); ?>" loading="lazy">
+        <div class="zb-showcase-content">
+            <?php if ($category) : ?>
+                <span class="zb-showcase-category"><?php echo esc_html($category); ?></span>
+            <?php else : ?>
+                <span></span>
+            <?php endif; ?>
+
+            <div>
+                <h3><?php echo esc_html($product->get_name()); ?></h3>
+                <p>
+                    <?php
+                    if ($is_waitlist) {
+                        esc_html_e('Sob encomenda', 'zwei-bruder');
+                    } else {
+                        echo wp_kses_post($product->get_price_html());
+                    }
+                    ?>
+                </p>
+            </div>
+        </div>
+    </a>
+    <?php
+}
+
+function zwei_bruder_featured_products(): array
+{
+    if (!function_exists('wc_get_products')) {
+        return [];
+    }
+
+    $featured = wc_get_products([
+        'status' => 'publish',
+        'featured' => true,
+        'limit' => 8,
+        'orderby' => 'date',
+        'order' => 'DESC',
+    ]);
+
+    if (!empty($featured)) {
+        return $featured;
+    }
+
+    return array_slice(zwei_bruder_catalog_products(8), 0, 4);
+}
+
+function zwei_bruder_catalog_products(int $limit = 12): array
+{
+    if (!function_exists('wc_get_products')) {
+        return [];
+    }
+
+    return wc_get_products([
+        'status' => 'publish',
+        'limit' => $limit,
+        'orderby' => 'date',
+        'order' => 'DESC',
+    ]);
+}
+
+function zwei_bruder_category_banners(): array
+{
+    if (!taxonomy_exists('product_cat') || !function_exists('wc_get_products')) {
+        return [];
+    }
+
+    $terms = get_terms([
+        'taxonomy' => 'product_cat',
+        'hide_empty' => true,
+        'number' => 2,
+    ]);
+
+    if (is_wp_error($terms)) {
+        return [];
+    }
+
+    $banners = [];
+    foreach ($terms as $term) {
+        $products = wc_get_products([
+            'status' => 'publish',
+            'category' => [$term->slug],
+            'limit' => 1,
+        ]);
+        $image = isset($products[0]) ? zwei_bruder_product_image_src($products[0]) : '';
+        $banners[] = [
+            'name' => $term->name,
+            'url' => get_term_link($term),
+            'count' => (int) $term->count,
+            'image' => $image,
+        ];
+    }
+
+    return $banners;
+}
 
 function zwei_bruder_create_page(string $title, string $slug, string $content = ''): int
 {
