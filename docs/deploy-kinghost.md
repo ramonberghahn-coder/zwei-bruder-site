@@ -24,7 +24,7 @@ docs/migracao-render-kinghost.md
 ```txt
 IMAGE_STORAGE=local
 DATABASE_URL=postgresql://postgres.PROJECT_REF:SENHA@....pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
-NEXT_PUBLIC_SITE_URL=https://zweibruder.com.br/loja
+NEXT_PUBLIC_SITE_URL=https://zweibruder.com.br
 ADMIN_PASSWORD=SUA_SENHA_ADMIN
 SESSION_SECRET=UMA_STRING_FORTE_COM_PELO_MENOS_32_CARACTERES
 NODE_ENV=production
@@ -34,7 +34,7 @@ NODE_ENV=production
 estão configurados), os uploads vão para:
 
 ```txt
-public/uploads/products/   → fotos de produto  (/loja/uploads/products/...)
+public/uploads/products/   → fotos de produto  (/uploads/products/...)
 public/uploads/settings/   → QR PIX etc.
 ```
 
@@ -48,15 +48,10 @@ Mantenha essa pasta no servidor entre deploys (não apague no FTP).
 | `cloudinary` | Cloudinary (precisa `CLOUDINARY_*`) |
 | `wordpress` | Mídia WordPress (precisa `WORDPRESS_MEDIA_*`) |
 
-## Subpasta `/loja`
-
-O `next.config.ts` define `basePath: "/loja"`, alinhado ao proxy da KingHost
-(`zweibruder.com.br/loja`). A loja, o admin e as APIs ficam sob esse prefixo.
-
 ## Painel Node.js
 
 1. Script de inicialização: **`kinghost-start.js`**
-2. Acesso web em **`/loja`** (como no painel)
+2. Habilite acesso web na **raiz do domínio** (proxy 80/443), se disponível
 
 ```bash
 npm install
@@ -67,8 +62,8 @@ npm run start:kinghost
 ## Setup do banco (uma vez)
 
 ```txt
-https://SEU-DOMINIO/loja/api/setup?token=SUA_SENHA_ADMIN
-https://SEU-DOMINIO/loja/api/health
+https://SEU-DOMINIO/api/setup?token=SUA_SENHA_ADMIN
+https://SEU-DOMINIO/api/health
 ```
 
 Em `/api/health`, confira `"imageStorage": "local"`.

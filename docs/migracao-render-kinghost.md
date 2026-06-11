@@ -55,7 +55,7 @@ Se faltar memória no build: compile no PC e envie `.next`.
 ```txt
 IMAGE_STORAGE=local
 DATABASE_URL=postgresql://...
-NEXT_PUBLIC_SITE_URL=https://zweibruder.com.br/loja
+NEXT_PUBLIC_SITE_URL=https://zweibruder.com.br
 ADMIN_PASSWORD=...
 SESSION_SECRET=...
 NODE_ENV=production
@@ -77,9 +77,9 @@ npm run start:kinghost
 ## Passo 6 — Setup e teste
 
 ```txt
-/loja/api/setup?token=SUA_SENHA_ADMIN
-/loja/api/health     → "imageStorage": "local"
-/loja/admin/login
+/api/setup?token=SUA_SENHA_ADMIN
+/api/health          → "imageStorage": "local"
+/admin/login
 ```
 
 Cadastre ou edite produtos e **envie fotos de novo** pelo painel.

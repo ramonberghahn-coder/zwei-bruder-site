@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { withBasePath } from "@/lib/base-path";
 
 type Props = {
   orderNumber: string;
@@ -27,10 +26,7 @@ export default function CheckoutActions({ orderNumber, pixPayload, qrDataUrl }: 
     try {
       const form = new FormData();
       form.append("proof", proofFile);
-      const res = await fetch(withBasePath(`/api/orders/${orderNumber}/proof`), {
-        method: "POST",
-        body: form,
-      });
+      const res = await fetch(`/api/orders/${orderNumber}/proof`, { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Falha ao enviar comprovante.");
       window.open(data.whatsappUrl, "_blank");

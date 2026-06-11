@@ -1,7 +1,5 @@
 "use client";
 
-import { withBasePath } from "@/lib/base-path";
-
 export default function Error({
   reset,
 }: {
@@ -16,7 +14,7 @@ export default function Error({
         navegador{" "}
         <code className="text-xs">/api/setup?token=SUA_SENHA_ADMIN</code> (use a mesma senha
         do painel) e depois{" "}
-        <a href={withBasePath("/api/health")} className="underline">
+        <a href="/api/health" className="underline">
           /api/health
         </a>{" "}
         para confirmar a conexão com o banco.
