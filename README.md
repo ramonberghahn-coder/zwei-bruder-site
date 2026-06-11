@@ -65,6 +65,32 @@ Abra http://localhost:3000.
 4. Cliente paga, envia comprovante.
 5. Site abre WhatsApp Web com o texto do pedido para o número da empresa.
 
+## Bot WhatsApp (WhatsApp Web)
+
+Atendimento automático com menu para catálogo, status de pedido e encaminhamento para humano.
+
+**Importante:** o bot usa WhatsApp Web (biblioteca Baileys) e precisa ficar **sempre ligado** em um PC, VPS ou mini-servidor. Não roda no plano web da Render (processo sem estado persistente).
+
+1. Configure `.env` com `DATABASE_URL` e `NEXT_PUBLIC_SITE_URL` (mesmos do site).
+2. Instale dependências e inicie o bot:
+
+```bash
+npm install
+npm run bot
+```
+
+3. Escaneie o QR Code com o **WhatsApp do negócio** (Aparelhos conectados).
+4. A sessão fica salva em `bot/auth/` — não commite essa pasta.
+
+Menu automático:
+
+- **1** — link do catálogo
+- **2** — status do pedido (busca pelo telefone ou código `ZB...`)
+- **3** — falar com atendente (bot fica em silêncio até digitar `menu`)
+- **4** — sobre a loja
+
+Risco: conexões não oficiais via WhatsApp Web podem ser bloqueadas pela Meta se houver spam ou volume alto. Use com moderação.
+
 ## Observações
 
 - Os uploads de imagens do painel admin são enviados ao Cloudinary e o banco salva
@@ -132,7 +158,13 @@ npm run images:migrate-to-cloudinary
 
 ## Deploy na KingHost
 
-Para hospedar o app em um plano Node.js da KingHost, veja o guia:
+Para **migrar da Render** ou subir o app em plano Node.js da KingHost:
+
+```txt
+docs/migracao-render-kinghost.md
+```
+
+Resumo técnico:
 
 ```txt
 docs/deploy-kinghost.md

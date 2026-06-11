@@ -1,6 +1,12 @@
-import { createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 
 const DEFAULT_CLOUDINARY_FOLDER = "zwei-bruder-store";
+const LOCAL_PRODUCTS_DIR = path.join("uploads", "products");
+const LOCAL_SETTINGS_DIR = path.join("uploads", "settings");
+
+export type ImageStorageMode = "local" | "wordpress" | "cloudinary";
 
 type CloudinaryConfig = {
   cloudName: string;
@@ -10,17 +16,17 @@ type CloudinaryConfig = {
   folder: string;
 };
 
+type WordPressMediaConfig = {
+  url: string;
+  user: string;
+  appPassword: string;
+};
+
 type CloudinaryUploadResponse = {
   secure_url?: unknown;
   error?: {
     message?: unknown;
   };
-};
-
-type WordPressMediaConfig = {
-  url: string;
-  user: string;
-  appPassword: string;
 };
 
 type WordPressMediaResponse = {
@@ -38,19 +44,25 @@ export class ImageStorageConfigError extends Error {
   }
 }
 
-function storageConfigError(): ImageStorageConfigError {
-  return new ImageStorageConfigError(
-    [
-      "Upload externo não configurado.",
-      "Para salvar no WordPress/KingHost, defina WOOCOMMERCE_URL, WORDPRESS_MEDIA_USER e WORDPRESS_MEDIA_APP_PASSWORD.",
-      "Ou configure Cloudinary com CLOUDINARY_CLOUD_NAME e CLOUDINARY_UPLOAD_PRESET (preset unsigned) ou CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET.",
-    ].join(" ")
-  );
-}
-
 function envValue(name: string): string | undefined {
   const value = process.env[name]?.trim();
   return value || undefined;
+}
+
+function extensionForMime(mimeType: string): string {
+  if (mimeType === "image/png") return "png";
+  if (mimeType === "image/webp") return "webp";
+  if (mimeType === "image/gif") return "gif";
+  return "jpg";
+}
+
+function parseDataUrl(dataUrl: string): { mimeType: string; bytes: Buffer } | null {
+  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(dataUrl.trim());
+  if (!match) return null;
+  return {
+    mimeType: match[1],
+    bytes: Buffer.from(match[2], "base64"),
+  };
 }
 
 function getWordPressMediaConfig(): WordPressMediaConfig | null {
@@ -67,19 +79,14 @@ function getWordPressMediaConfig(): WordPressMediaConfig | null {
   };
 }
 
-function getCloudinaryConfig(): CloudinaryConfig {
+function getCloudinaryConfig(): CloudinaryConfig | null {
   const cloudName = envValue("CLOUDINARY_CLOUD_NAME");
   const uploadPreset = envValue("CLOUDINARY_UPLOAD_PRESET");
   const apiKey = envValue("CLOUDINARY_API_KEY");
   const apiSecret = envValue("CLOUDINARY_API_SECRET");
 
-  if (!cloudName) {
-    throw storageConfigError();
-  }
-
-  if (!uploadPreset && (!apiKey || !apiSecret)) {
-    throw storageConfigError();
-  }
+  if (!cloudName) return null;
+  if (!uploadPreset && (!apiKey || !apiSecret)) return null;
 
   return {
     cloudName,
@@ -90,8 +97,68 @@ function getCloudinaryConfig(): CloudinaryConfig {
   };
 }
 
+export function getImageStorageMode(): ImageStorageMode {
+  const explicit = envValue("IMAGE_STORAGE")?.toLowerCase();
+
+  if (explicit === "local" || explicit === "filesystem" || explicit === "kinghost") {
+    return "local";
+  }
+  if (explicit === "wordpress") {
+    return getWordPressMediaConfig() ? "wordpress" : "local";
+  }
+  if (explicit === "cloudinary") {
+    return getCloudinaryConfig() ? "cloudinary" : "local";
+  }
+
+  if (getWordPressMediaConfig()) return "wordpress";
+  if (getCloudinaryConfig()) return "cloudinary";
+  return "local";
+}
+
+function storageConfigError(mode: ImageStorageMode): ImageStorageConfigError {
+  if (mode === "wordpress") {
+    return new ImageStorageConfigError(
+      "WordPress não configurado. Defina WOOCOMMERCE_URL, WORDPRESS_MEDIA_USER e WORDPRESS_MEDIA_APP_PASSWORD."
+    );
+  }
+  if (mode === "cloudinary") {
+    return new ImageStorageConfigError(
+      "Cloudinary não configurado. Defina CLOUDINARY_CLOUD_NAME e CLOUDINARY_UPLOAD_PRESET (ou API key/secret)."
+    );
+  }
+  return new ImageStorageConfigError("Falha ao salvar imagem no servidor.");
+}
+
+async function writeLocalFile(
+  relativeDir: string,
+  bytes: Buffer,
+  mimeType: string,
+  prefix = "img"
+): Promise<string> {
+  const absoluteDir = path.join(process.cwd(), "public", relativeDir);
+  await mkdir(absoluteDir, { recursive: true });
+
+  const filename = `${prefix}-${Date.now()}-${randomBytes(4).toString("hex")}.${extensionForMime(mimeType)}`;
+  await writeFile(path.join(absoluteDir, filename), bytes);
+
+  return `/${relativeDir.replace(/\\/g, "/")}/${filename}`;
+}
+
+async function uploadFileToLocal(file: File): Promise<string> {
+  const bytes = Buffer.from(await file.arrayBuffer());
+  return writeLocalFile(LOCAL_PRODUCTS_DIR, bytes, file.type, "produto");
+}
+
+async function uploadDataUrlToLocal(dataUrl: string): Promise<string> {
+  const parsed = parseDataUrl(dataUrl);
+  if (!parsed) {
+    throw new ImageStorageConfigError("Data URL de imagem inválida.");
+  }
+  return writeLocalFile(LOCAL_PRODUCTS_DIR, parsed.bytes, parsed.mimeType, "produto");
+}
+
 function sanitizeFilename(name: string, mimeType: string): string {
-  const fallbackExtension = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  const fallbackExtension = extensionForMime(mimeType);
   const base = name
     .trim()
     .toLowerCase()
@@ -115,7 +182,7 @@ function wordpressMediaUrl(payload: WordPressMediaResponse | undefined): string 
 
 async function uploadFileToWordPress(file: File): Promise<string> {
   const config = getWordPressMediaConfig();
-  if (!config) throw storageConfigError();
+  if (!config) throw storageConfigError("wordpress");
 
   const filename = sanitizeFilename(file.name, file.type);
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -152,10 +219,7 @@ async function uploadFileToWordPress(file: File): Promise<string> {
   return url;
 }
 
-function signCloudinaryParams(
-  params: Record<string, string>,
-  apiSecret: string
-): string {
+function signCloudinaryParams(params: Record<string, string>, apiSecret: string): string {
   const payload = Object.entries(params)
     .filter(([, value]) => value !== "")
     .sort(([a], [b]) => a.localeCompare(b))
@@ -175,6 +239,8 @@ function cloudinaryErrorMessage(payload: unknown): string | undefined {
 
 async function uploadToCloudinary(source: File | string): Promise<string> {
   const config = getCloudinaryConfig();
+  if (!config) throw storageConfigError("cloudinary");
+
   const formData = new FormData();
   formData.append("file", source);
   formData.append("folder", config.folder);
@@ -226,13 +292,28 @@ async function uploadToCloudinary(source: File | string): Promise<string> {
 }
 
 export async function uploadImageFileToStorage(file: File): Promise<string> {
-  if (getWordPressMediaConfig()) {
-    return uploadFileToWordPress(file);
-  }
+  const mode = getImageStorageMode();
 
+  if (mode === "local") return uploadFileToLocal(file);
+  if (mode === "wordpress") return uploadFileToWordPress(file);
   return uploadToCloudinary(file);
 }
 
 export async function uploadImageDataUrlToStorage(dataUrl: string): Promise<string> {
+  const mode = getImageStorageMode();
+
+  if (mode === "local") return uploadDataUrlToLocal(dataUrl);
   return uploadToCloudinary(dataUrl);
+}
+
+/** QR PIX e outros assets do painel (pasta separada no disco local). */
+export async function uploadSettingsImageFileToStorage(file: File): Promise<string> {
+  const mode = getImageStorageMode();
+
+  if (mode === "local") {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    return writeLocalFile(LOCAL_SETTINGS_DIR, bytes, file.type, "config");
+  }
+
+  return uploadImageFileToStorage(file);
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
+import { withBasePath } from "@/lib/base-path";
 import { formatCurrency, isWaitlist, maxOrderQty, productImageUrl } from "@/lib/utils";
 import { getWhatsAppWebUrl } from "@/lib/whatsapp";
 
@@ -87,7 +88,7 @@ export default function ProductDetails({ product, whatsappNumber }: ProductDetai
   useEffect(() => {
     if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
   }, [origin]);
-  const productLink = origin ? `${origin}/produto/${product.slug}` : "";
+  const productLink = origin ? `${origin}${withBasePath(`/produto/${product.slug}`)}` : "";
   const restockUrl = whatsappNumber
     ? getWhatsAppWebUrl(
         whatsappNumber,

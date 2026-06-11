@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminFetch, readAdminError } from "@/lib/admin-fetch";
+import { productImageUrl } from "@/lib/utils";
 
 type ProductPayload = {
   name: string;
@@ -325,7 +326,11 @@ export default function ProductForm({
               {images.map((img, index) => (
                 <div key={`${img.slice(0, 24)}-${index}`} className="relative border border-neutral-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt={`Imagem ${index + 1}`} className="aspect-square w-full object-cover" />
+                  <img
+                    src={productImageUrl(img)}
+                    alt={`Imagem ${index + 1}`}
+                    className="aspect-square w-full object-cover"
+                  />
 
                   {index === 0 ? (
                     <span className="absolute left-1 top-1 bg-green-700 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white">
@@ -404,8 +409,8 @@ export default function ProductForm({
             }}
           />
           <p className="mt-1 text-xs text-neutral-600">
-            Selecione várias de uma vez ou envie uma por vez. As fotos enviadas ficam no
-            armazenamento externo, e o produto salva apenas a URL.
+            Selecione várias de uma vez ou envie uma por vez. As fotos ficam em
+            /uploads/products/ no servidor (KingHost).
           </p>
           {images.length >= MAX_PRODUCT_IMAGES ? (
             <p className="mt-1 text-xs text-amber-800">Limite de fotos atingido.</p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 import { formatCurrency, productImageUrl } from "@/lib/utils";
 import { getWhatsAppWebUrl } from "@/lib/whatsapp";
 
@@ -25,7 +26,7 @@ export default function ProductCard({ product, whatsappNumber }: ProductCardProp
   useEffect(() => {
     if (!origin && typeof window !== "undefined") setOrigin(window.location.origin);
   }, [origin]);
-  const productLink = origin ? `${origin}/produto/${product.slug}` : "";
+  const productLink = origin ? `${origin}${withBasePath(`/produto/${product.slug}`)}` : "";
   const restockUrl = whatsappNumber
     ? getWhatsAppWebUrl(
         whatsappNumber,

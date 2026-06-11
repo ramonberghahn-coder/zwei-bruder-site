@@ -1,5 +1,14 @@
+import { withBasePath } from "@/lib/base-path";
+
+function resolveInput(input: RequestInfo | URL): RequestInfo | URL {
+  if (typeof input === "string" && input.startsWith("/")) {
+    return withBasePath(input);
+  }
+  return input;
+}
+
 export async function adminFetch(input: RequestInfo | URL, init?: RequestInit) {
-  return fetch(input, {
+  return fetch(resolveInput(input), {
     ...init,
     credentials: "include",
     headers: {

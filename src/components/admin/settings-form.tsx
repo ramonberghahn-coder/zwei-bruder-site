@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminFetch, readAdminError } from "@/lib/admin-fetch";
 import type { StoreSettings } from "@/lib/settings";
+import { productImageUrl } from "@/lib/utils";
 
 export default function SettingsForm({ initial }: { initial: StoreSettings }) {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
 
     try {
       setPixQrImage(await uploadQrFile(file));
-      setMessage("QR Code enviado para o armazenamento externo.");
+      setMessage("QR Code salvo no servidor.");
       setIsError(false);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Erro ao enviar QR Code.");
@@ -152,7 +153,7 @@ export default function SettingsForm({ initial }: { initial: StoreSettings }) {
           <div className="mt-3 flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={pixQrImage}
+              src={productImageUrl(pixQrImage)}
               alt="QR Code PIX"
               className="h-28 w-28 rounded border border-neutral-200 bg-white object-contain p-1"
             />

@@ -5,6 +5,7 @@ import {
   usesNeonDatabase,
 } from "@/lib/database-url";
 import { assertDatabase, prismaErrorMessage } from "@/lib/db-errors";
+import { getImageStorageMode } from "@/lib/image-storage";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export async function GET() {
       driver: usesNeonDatabase() ? "neon-serverless" : "postgres-tcp",
       productCount,
       activeProductCount,
+      imageStorage: getImageStorageMode(),
       hints: databaseUrlDiagnostics(),
     });
   } catch (error) {

@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/base-path";
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -19,13 +21,11 @@ const FALLBACK_IMAGE = "https://picsum.photos/800/600";
 export function productImageUrl(url: string | undefined): string {
   const trimmed = url?.trim();
   if (!trimmed) return FALLBACK_IMAGE;
-  if (
-    trimmed.startsWith("/") ||
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://") ||
-    trimmed.startsWith("data:image/")
-  ) {
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:image/")) {
     return trimmed;
+  }
+  if (trimmed.startsWith("/")) {
+    return withBasePath(trimmed);
   }
   return FALLBACK_IMAGE;
 }

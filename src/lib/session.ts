@@ -20,7 +20,7 @@ export const sessionOptions: SessionOptions = {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax",
-    path: "/",
+    path: process.env.NEXT_PUBLIC_BASE_PATH || "/",
     maxAge: 60 * 60 * 24 * 7,
   },
 };

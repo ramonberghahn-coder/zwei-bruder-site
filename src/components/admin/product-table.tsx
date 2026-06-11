@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import DeleteProductButton from "@/components/admin/delete-product-button";
 import { adminFetch, readAdminError } from "@/lib/admin-fetch";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, productImageUrl } from "@/lib/utils";
 
 export type ProductRow = {
   id: string;
@@ -142,7 +142,7 @@ export default function ProductTable({
                 ) : null}
                 <td className="px-4 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image} alt={p.name} className="h-12 w-12 object-cover" />
+                  <img src={productImageUrl(p.image)} alt={p.name} className="h-12 w-12 object-cover" />
                 </td>
                 <td className="px-4 py-3">{p.name}</td>
                 <td className="px-4 py-3">{formatCurrency(p.price)}</td>

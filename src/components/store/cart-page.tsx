@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/contexts/cart-context";
+import { withBasePath } from "@/lib/base-path";
 import { formatCurrency, isWaitlist, maxOrderQty } from "@/lib/utils";
 import type { ShippingOption } from "@/lib/shipping";
 
@@ -69,7 +70,7 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
     }
     setShipLoading(true);
     try {
-      const res = await fetch("/api/shipping", {
+      const res = await fetch(withBasePath("/api/shipping"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -118,7 +119,7 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       };
 
-      const res = await fetch("/api/cart/reserve", {
+      const res = await fetch(withBasePath("/api/cart/reserve"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -154,7 +155,7 @@ export default function CartPage({ settings }: { settings: CartSettings }) {
     setSending(true);
     setError(null);
     try {
-      const res = await fetch(`/api/orders/${payment.orderNumber}/proof`, {
+      const res = await fetch(withBasePath(`/api/orders/${payment.orderNumber}/proof`), {
         method: "POST",
       });
       const data = await res.json();

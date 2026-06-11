@@ -7,6 +7,7 @@ import ProductShowcaseCard, {
 import type { CatalogProduct } from "@/lib/store-products";
 import { fetchActiveCatalogProductsSafe } from "@/lib/store-products";
 import { getSettings, parseCategories } from "@/lib/settings";
+import { withBasePath } from "@/lib/base-path";
 import { parseImages, productImageUrl } from "@/lib/utils";
 
 function toShowcase(p: CatalogProduct): ShowcaseProduct {
@@ -92,7 +93,7 @@ export default async function HomePage({
           <p className="mt-2 leading-relaxed text-amber-100/90">{catalogError}</p>
           <p className="mt-3 text-xs text-amber-200/70">
             Confira também{" "}
-            <a href="/api/health" className="underline" target="_blank" rel="noreferrer">
+            <a href={withBasePath("/api/health")} className="underline" target="_blank" rel="noreferrer">
               /api/health
             </a>
           </p>
