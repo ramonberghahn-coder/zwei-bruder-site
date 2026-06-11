@@ -204,13 +204,13 @@ img {
 }
 
 .zb-featured-carousel {
-  margin-top: clamp(4rem, 8vw, 5rem);
+  margin-top: clamp(2rem, 5vw, 2.75rem);
 }
 
 .zb-carousel-heading {
   display: flex;
   align-items: end;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
 }
 
@@ -239,7 +239,7 @@ img {
 .zb-catalog-scroll {
   display: flex;
   gap: 6px;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scrollbar-width: none;
@@ -273,7 +273,7 @@ img {
 
 .zb-hero-product {
   overflow: hidden;
-  margin-top: clamp(4rem, 8vw, 5rem);
+  margin-top: clamp(2.5rem, 5vw, 3rem);
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--zb-surface);
 }

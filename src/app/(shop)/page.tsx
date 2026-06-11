@@ -86,11 +86,11 @@ export default async function HomePage({
           ) : null}
 
           {!activeCategory && featured.length > 0 ? (
-            <ProductCarousel title="Destaques" products={featured} />
+            <ProductCarousel products={featured} />
           ) : null}
 
           {!activeCategory && heroProduct ? (
-            <section className="relative mt-16 overflow-hidden border border-white/10 bg-[#1a1816] md:mt-20">
+            <section className="relative mt-10 overflow-hidden border border-white/10 bg-[#1a1816] md:mt-12">
               <div className="grid md:grid-cols-2">
                 <div className="flex flex-col justify-center p-8 md:p-12 lg:p-16">
                   <p className="eyebrow text-[#9a9288]">

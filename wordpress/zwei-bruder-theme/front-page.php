@@ -60,7 +60,6 @@ if (taxonomy_exists('product_cat')) {
         <?php if (!empty($featured_products)) : ?>
             <section class="zb-featured-carousel">
                 <div class="zb-carousel-heading">
-                    <h2><?php esc_html_e('Destaques', 'zwei-bruder'); ?></h2>
                     <div class="zb-carousel-actions" aria-hidden="true">
                         <span>‹</span>
                         <span>›</span>

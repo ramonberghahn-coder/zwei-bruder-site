@@ -7,7 +7,7 @@ export default function ProductCarousel({
   title,
   products,
 }: {
-  title: string;
+  title?: string;
   products: ShowcaseProduct[];
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -22,32 +22,32 @@ export default function ProductCarousel({
   }
 
   return (
-    <section className="mt-16 md:mt-20">
-      <div className="flex items-end justify-between gap-4">
-        <h2 className="font-display text-3xl font-medium md:text-4xl">{title}</h2>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => scrollBy(-1)}
-            className="flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
-            aria-label="Anterior"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollBy(1)}
-            className="flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
-            aria-label="Próximo"
-          >
-            ›
-          </button>
-        </div>
+    <section className="mt-8 md:mt-10">
+      <div className="flex justify-end">
+        {title ? (
+          <h2 className="font-display mr-auto text-3xl font-medium md:text-4xl">{title}</h2>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => scrollBy(-1)}
+          className="flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
+          aria-label="Anterior"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollBy(1)}
+          className="ml-2 flex h-10 w-10 items-center justify-center border border-white/20 text-lg text-white/80 transition hover:border-white/50 hover:text-white"
+          aria-label="Próximo"
+        >
+          ›
+        </button>
       </div>
 
       <div
         ref={trackRef}
-        className="catalog-scroll mt-6 flex gap-1.5 overflow-x-auto pb-2 md:gap-2"
+        className="catalog-scroll mt-3 flex gap-1.5 overflow-x-auto pb-2 md:mt-4 md:gap-2"
       >
         {products.map((product) => (
           <div
