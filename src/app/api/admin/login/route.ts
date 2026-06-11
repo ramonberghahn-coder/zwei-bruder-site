@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Erro ao iniciar sessão. Verifique SESSION_SECRET na Render (32+ caracteres).",
+            : "Erro ao iniciar sessão. Verifique SESSION_SECRET no servidor (32+ caracteres).",
       },
       { status: 500 }
     );

@@ -28,7 +28,11 @@ NEXT_PUBLIC_SITE_URL=https://zweibruder.com.br
 ADMIN_PASSWORD=SUA_SENHA_ADMIN
 SESSION_SECRET=UMA_STRING_FORTE_COM_PELO_MENOS_32_CARACTERES
 NODE_ENV=production
+# Enquanto testar por http://dominio:PORTA (ex.: :21127):
+ADMIN_COOKIE_SECURE=false
 ```
+
+Remova `ADMIN_COOKIE_SECURE=false` quando `https://dominio` (sem porta) estiver ok.
 
 **Imagens:** com `IMAGE_STORAGE=local` (padrão quando Cloudinary/WordPress não
 estão configurados), os uploads vão para:

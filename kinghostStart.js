@@ -1,4 +1,8 @@
 const { spawn } = require("child_process");
+const path = require("path");
+
+// PM2 da KingHost pode iniciar o script fora da pasta do projeto.
+process.chdir(__dirname);
 
 function resolvePort() {
   if (process.env.PORT) return process.env.PORT;

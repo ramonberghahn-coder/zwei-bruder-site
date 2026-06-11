@@ -13,11 +13,19 @@ const sessionPassword = (() => {
   return "development-secret-min-32-chars!!";
 })();
 
+function resolveAdminCookieSecure(): boolean {
+  const explicit = process.env.ADMIN_COOKIE_SECURE?.trim().toLowerCase();
+  if (explicit === "false" || explicit === "0" || explicit === "no") return false;
+  if (explicit === "true" || explicit === "1" || explicit === "yes") return true;
+  if (process.env.NODE_ENV !== "production") return false;
+  return (process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? "").startsWith("https://");
+}
+
 export const sessionOptions: SessionOptions = {
   password: sessionPassword,
   cookieName: "zwei-bruder-admin",
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    secure: resolveAdminCookieSecure(),
     httpOnly: true,
     sameSite: "lax",
     path: "/",
