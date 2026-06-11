@@ -16,9 +16,10 @@ function resolvePort() {
 
 const port = resolvePort();
 process.env.PORT = port;
+const hostname = process.env.HOSTNAME || process.env.HOST || "0.0.0.0";
 
 const nextBin = require.resolve("next/dist/bin/next");
-const child = spawn(process.execPath, [nextBin, "start", "-p", port], {
+const child = spawn(process.execPath, [nextBin, "start", "-H", hostname, "-p", port], {
   env: process.env,
   stdio: "inherit",
 });
