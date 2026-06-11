@@ -41,7 +41,7 @@ Hospedagem **Node.js**, Node 20 ou 22, SSL no domínio.
 
 ## Passo 2 — App Node no painel
 
-- Script: **`kinghost-start.js`**
+- Script: **`kinghostStart.js`** (sem `-` ou `_` no nome)
 - Acesso web (proxy 80/443) se disponível
 
 ## Passo 3 — Enviar código
@@ -93,7 +93,7 @@ Aponte o domínio para a KingHost e desligue a Render quando tudo estiver ok.
 ## Checklist
 
 - [ ] Plano Node.js KingHost
-- [ ] `kinghost-start.js` no painel
+- [ ] `kinghostStart.js` no painel
 - [ ] `IMAGE_STORAGE=local`
 - [ ] Banco acessível (Supabase pooler)
 - [ ] `/api/health` ok

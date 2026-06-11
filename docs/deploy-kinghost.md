@@ -50,7 +50,7 @@ Mantenha essa pasta no servidor entre deploys (não apague no FTP).
 
 ## Painel Node.js
 
-1. Script de inicialização: **`kinghost-start.js`**
+1. Script de inicialização: **`kinghostStart.js`** (sem `-` ou `_` no nome — exigência da KingHost)
 2. Habilite acesso web na **raiz do domínio** (proxy 80/443), se disponível
 
 ```bash
