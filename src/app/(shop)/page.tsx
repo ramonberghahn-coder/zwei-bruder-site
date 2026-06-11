@@ -68,24 +68,6 @@ export default async function HomePage({
 
   return (
     <div id="produtos" className="container page-y pb-24">
-      <p className="eyebrow text-[#9a9288]">
-        <Link href="/" className="hover:text-[#f4f0ea]">
-          Início
-        </Link>
-        {" / "}
-        <span className="text-[#f4f0ea]">Catálogo</span>
-        {activeCategory ? (
-          <>
-            {" / "}
-            <span className="text-[#f4f0ea]">{activeCategory}</span>
-          </>
-        ) : null}
-      </p>
-
-      <h1 className="font-display mt-4 text-5xl font-medium leading-none md:text-7xl">
-        {activeCategory ?? "Catálogo"}
-      </h1>
-
       {catalogError ? (
         <div className="mx-auto mt-12 max-w-lg border border-amber-500/40 bg-amber-500/10 p-5 text-center text-sm text-amber-100">
           <p className="font-medium">Não foi possível carregar os produtos</p>
