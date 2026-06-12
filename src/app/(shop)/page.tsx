@@ -21,11 +21,10 @@ function toShowcase(p: CatalogProduct): ShowcaseProduct {
   };
 }
 
-function bentoTileClass(index: number): string {
-  const mod = index % 6;
-  if (mod === 0) return "bento-tile-lg";
-  if (mod === 3) return "bento-tile-wide";
-  return "bento-tile-md";
+function catalogTileClass(index: number, total: number): string {
+  if (total === 1) return "catalog-tile-hero";
+  if (index === 0) return "catalog-tile-lg";
+  return "catalog-tile-md";
 }
 
 export default async function HomePage({
@@ -54,9 +53,12 @@ export default async function HomePage({
     products.filter((p) => p.featured).map((p) => p.slug)
   );
 
+  const nonFeaturedProducts = showcaseProducts.filter((p) => !featuredSlugs.has(p.slug));
   const visibleProducts = activeCategory
     ? showcaseProducts.filter((p) => p.category === activeCategory)
-    : showcaseProducts.filter((p) => !featuredSlugs.has(p.slug));
+    : nonFeaturedProducts.length > 0
+      ? nonFeaturedProducts
+      : showcaseProducts;
 
   const categoryBanners = categories.map((name) => {
     const inCategory = products.filter((p) => p.category === name);
@@ -128,12 +130,12 @@ export default async function HomePage({
                 : "Nenhum produto nesta categoria."}
             </p>
           ) : visibleProducts.length > 0 ? (
-            <div className="catalog-bento mt-4">
+            <div className="catalog-grid mt-4">
               {visibleProducts.map((product, index) => (
                 <ProductShowcaseCard
                   key={product.slug}
                   product={product}
-                  className={bentoTileClass(index)}
+                  className={catalogTileClass(index, visibleProducts.length)}
                 />
               ))}
             </div>

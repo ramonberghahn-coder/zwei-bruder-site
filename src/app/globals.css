@@ -248,50 +248,49 @@ a {
   color: var(--foreground);
 }
 
-.catalog-bento {
+.catalog-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
 }
 
 @media (min-width: 768px) {
-  .catalog-bento {
+  .catalog-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
   }
 }
 
-.bento-tile-lg {
+.catalog-tile-hero {
   grid-column: span 2;
-  grid-row: span 1;
+  min-height: 280px;
+}
+
+@media (min-width: 768px) {
+  .catalog-tile-hero {
+    grid-column: span 4;
+    min-height: 360px;
+  }
+}
+
+.catalog-tile-lg {
+  grid-column: span 2;
+  min-height: 240px;
+}
+
+@media (min-width: 768px) {
+  .catalog-tile-lg {
+    min-height: 320px;
+  }
+}
+
+.catalog-tile-md {
   min-height: 220px;
 }
 
 @media (min-width: 768px) {
-  .bento-tile-lg {
-    grid-row: span 2;
-    min-height: 420px;
-  }
-}
-
-.bento-tile-wide {
-  grid-column: span 2;
-  min-height: 200px;
-}
-
-@media (min-width: 768px) {
-  .bento-tile-wide {
-    min-height: 240px;
-  }
-}
-
-.bento-tile-md {
-  min-height: 200px;
-}
-
-@media (min-width: 768px) {
-  .bento-tile-md {
-    min-height: 240px;
+  .catalog-tile-md {
+    min-height: 280px;
   }
 }
 
@@ -299,8 +298,7 @@ a {
   position: relative;
   display: block;
   overflow: hidden;
-  height: 100%;
-  min-height: inherit;
+  min-height: 220px;
   background: var(--surface);
 }
 

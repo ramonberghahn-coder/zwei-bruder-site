@@ -18,7 +18,7 @@ export default function CategoryBanners({ categories }: { categories: CategoryBa
         <Link
           key={cat.name}
           href={`/?categoria=${encodeURIComponent(cat.name)}#produtos`}
-          className="showcase-card min-h-[220px] md:min-h-[320px]"
+          className="showcase-card block min-h-[220px] md:min-h-[320px]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={productImageUrl(cat.image)} alt={cat.name} loading="lazy" />
