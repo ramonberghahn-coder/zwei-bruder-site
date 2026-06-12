@@ -1,41 +1,43 @@
-const { spawn } = require("child_process");
-const path = require("path");
+const http = require("http");
+const { parse } = require("url");
+const next = require("next");
 
 // PM2 da KingHost pode iniciar o script fora da pasta do projeto.
 process.chdir(__dirname);
 
 function resolvePort() {
-  if (process.env.PORT) return process.env.PORT;
+  if (process.env.PORT) return Number(process.env.PORT);
 
   const kingHostPortEntry = Object.entries(process.env).find(([key, value]) => {
     return key.startsWith("PORT_") && value;
   });
 
-  return kingHostPortEntry?.[1] || "3000";
+  return Number(kingHostPortEntry?.[1] || 3000);
 }
 
 const port = resolvePort();
-process.env.PORT = port;
 const hostname = process.env.HOSTNAME || process.env.HOST || "0.0.0.0";
 
-const nextBin = require.resolve("next/dist/bin/next");
-const child = spawn(process.execPath, [nextBin, "start", "-H", hostname, "-p", port], {
-  env: process.env,
-  stdio: "inherit",
-});
+process.env.PORT = String(port);
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
 
-function forwardSignal(signal) {
-  child.kill(signal);
-}
+console.log(`[kinghostStart] cwd=${process.cwd()} port=${port} host=${hostname}`);
 
-process.on("SIGINT", () => forwardSignal("SIGINT"));
-process.on("SIGTERM", () => forwardSignal("SIGTERM"));
+const app = next({ dev: false, dir: __dirname });
+const handle = app.getRequestHandler();
 
-child.on("exit", (code, signal) => {
-  if (signal) {
-    process.kill(process.pid, signal);
-    return;
-  }
-
-  process.exit(code ?? 0);
-});
+app
+  .prepare()
+  .then(() => {
+    http
+      .createServer((req, res) => {
+        handle(req, res, parse(req.url, true));
+      })
+      .listen(port, hostname, () => {
+        console.log(`> Ready on http://${hostname}:${port}`);
+      });
+  })
+  .catch((err) => {
+    console.error("[kinghostStart] failed to start", err);
+    process.exit(1);
+  });

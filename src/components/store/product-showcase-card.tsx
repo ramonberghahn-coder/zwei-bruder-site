@@ -27,7 +27,7 @@ export default function ProductShowcaseCard({
   return (
     <Link
       href={`/produto/${product.slug}`}
-      className={`showcase-card group ${className}`}
+      className={`showcase-card group block ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={image} alt={product.name} loading="lazy" />

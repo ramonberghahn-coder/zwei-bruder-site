@@ -263,12 +263,13 @@ a {
 
 .bento-tile-lg {
   grid-column: span 2;
-  grid-row: span 2;
-  min-height: 280px;
+  grid-row: span 1;
+  min-height: 220px;
 }
 
 @media (min-width: 768px) {
   .bento-tile-lg {
+    grid-row: span 2;
     min-height: 420px;
   }
 }

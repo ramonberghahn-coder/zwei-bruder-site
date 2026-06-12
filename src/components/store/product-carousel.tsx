@@ -22,7 +22,7 @@ export default function ProductCarousel({
   }
 
   return (
-    <section className="mt-8 md:mt-10">
+    <section className="mt-4 md:mt-6">
       <div className="flex justify-end">
         {title ? (
           <h2 className="font-display mr-auto text-3xl font-medium md:text-4xl">{title}</h2>
@@ -47,7 +47,7 @@ export default function ProductCarousel({
 
       <div
         ref={trackRef}
-        className="catalog-scroll mt-3 flex gap-1.5 overflow-x-auto pb-2 md:mt-4 md:gap-2"
+        className={`catalog-scroll flex gap-1.5 overflow-x-auto pb-2 md:gap-2 ${title ? "mt-4" : "mt-2"}`}
       >
         {products.map((product) => (
           <div

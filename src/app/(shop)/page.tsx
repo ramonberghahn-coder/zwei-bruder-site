@@ -1,6 +1,6 @@
 import Link from "next/link";
 import CategoryBanners from "@/components/store/category-banners";
-import ProductCarousel from "@/components/store/product-carousel";
+import FeaturedProductsRow from "@/components/store/featured-products-row";
 import ProductShowcaseCard, {
   type ShowcaseProduct,
 } from "@/components/store/product-showcase-card";
@@ -50,9 +50,13 @@ export default async function HomePage({
 
   const activeCategory =
     categoria && categories.includes(categoria) ? categoria : null;
+  const featuredSlugs = new Set(
+    products.filter((p) => p.featured).map((p) => p.slug)
+  );
+
   const visibleProducts = activeCategory
     ? showcaseProducts.filter((p) => p.category === activeCategory)
-    : showcaseProducts;
+    : showcaseProducts.filter((p) => !featuredSlugs.has(p.slug));
 
   const categoryBanners = categories.map((name) => {
     const inCategory = products.filter((p) => p.category === name);
@@ -67,7 +71,7 @@ export default async function HomePage({
   const heroProduct = featured[0] ?? showcaseProducts[0];
 
   return (
-    <div id="produtos" className="container page-y pb-24">
+    <div id="produtos" className="container pb-24 pt-6 md:pt-8">
       {catalogError ? (
         <div className="mx-auto mt-12 max-w-lg border border-amber-500/40 bg-amber-500/10 p-5 text-center text-sm text-amber-100">
           <p className="font-medium">Não foi possível carregar os produtos</p>
@@ -81,16 +85,66 @@ export default async function HomePage({
         </div>
       ) : (
         <>
+          {!activeCategory && featured.length > 0 ? (
+            <FeaturedProductsRow products={featured} />
+          ) : null}
+
+          {categories.length > 0 ? (
+            <div
+              className={`flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-white/10 pb-4 ${
+                !activeCategory && featured.length > 0 ? "mt-4" : ""
+              }`}
+            >
+              <Link
+                href="/#produtos"
+                className={`text-xs font-medium uppercase tracking-[0.14em] transition ${
+                  !activeCategory
+                    ? "text-[#f4f0ea] underline decoration-[#c4a574] decoration-2 underline-offset-8"
+                    : "text-[#9a9288] hover:text-[#f4f0ea]"
+                }`}
+              >
+                Todos
+              </Link>
+              {categories.map((c) => (
+                <Link
+                  key={c}
+                  href={`/?categoria=${encodeURIComponent(c)}#produtos`}
+                  className={`text-xs font-medium uppercase tracking-[0.14em] transition ${
+                    activeCategory === c
+                      ? "text-[#f4f0ea] underline decoration-[#c4a574] decoration-2 underline-offset-8"
+                      : "text-[#9a9288] hover:text-[#f4f0ea]"
+                  }`}
+                >
+                  {c}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {visibleProducts.length === 0 && (activeCategory || featured.length === 0) ? (
+            <p className="mt-12 text-center text-sm text-[#9a9288]">
+              {products.length === 0
+                ? "Nenhum produto cadastrado ainda."
+                : "Nenhum produto nesta categoria."}
+            </p>
+          ) : visibleProducts.length > 0 ? (
+            <div className="catalog-bento mt-4">
+              {visibleProducts.map((product, index) => (
+                <ProductShowcaseCard
+                  key={product.slug}
+                  product={product}
+                  className={bentoTileClass(index)}
+                />
+              ))}
+            </div>
+          ) : null}
+
           {!activeCategory && categoryBanners.length > 0 ? (
             <CategoryBanners categories={categoryBanners} />
           ) : null}
 
-          {!activeCategory && featured.length > 0 ? (
-            <ProductCarousel products={featured} />
-          ) : null}
-
           {!activeCategory && heroProduct ? (
-            <section className="relative mt-10 overflow-hidden border border-white/10 bg-[#1a1816] md:mt-12">
+            <section className="relative mt-12 overflow-hidden border border-white/10 bg-[#1a1816] md:mt-16">
               <div className="grid md:grid-cols-2">
                 <div className="flex flex-col justify-center p-8 md:p-12 lg:p-16">
                   <p className="eyebrow text-[#9a9288]">
@@ -122,52 +176,6 @@ export default async function HomePage({
               </div>
             </section>
           ) : null}
-
-          {categories.length > 0 ? (
-            <div className="mt-14 flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-white/10 pb-4 md:mt-20">
-              <Link
-                href="/#produtos"
-                className={`text-xs font-medium uppercase tracking-[0.14em] transition ${
-                  !activeCategory
-                    ? "text-[#f4f0ea] underline decoration-[#c4a574] decoration-2 underline-offset-8"
-                    : "text-[#9a9288] hover:text-[#f4f0ea]"
-                }`}
-              >
-                Todos
-              </Link>
-              {categories.map((c) => (
-                <Link
-                  key={c}
-                  href={`/?categoria=${encodeURIComponent(c)}#produtos`}
-                  className={`text-xs font-medium uppercase tracking-[0.14em] transition ${
-                    activeCategory === c
-                      ? "text-[#f4f0ea] underline decoration-[#c4a574] decoration-2 underline-offset-8"
-                      : "text-[#9a9288] hover:text-[#f4f0ea]"
-                  }`}
-                >
-                  {c}
-                </Link>
-              ))}
-            </div>
-          ) : null}
-
-          {visibleProducts.length === 0 ? (
-            <p className="mt-12 text-center text-sm text-[#9a9288]">
-              {products.length === 0
-                ? "Nenhum produto cadastrado ainda."
-                : "Nenhum produto nesta categoria."}
-            </p>
-          ) : (
-            <div className="catalog-bento mt-6 md:mt-8">
-              {visibleProducts.map((product, index) => (
-                <ProductShowcaseCard
-                  key={product.slug}
-                  product={product}
-                  className={bentoTileClass(index)}
-                />
-              ))}
-            </div>
-          )}
         </>
       )}
     </div>

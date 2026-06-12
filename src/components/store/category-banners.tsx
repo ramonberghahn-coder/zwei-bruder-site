@@ -13,7 +13,7 @@ export default function CategoryBanners({ categories }: { categories: CategoryBa
   const tiles = categories.slice(0, 2);
 
   return (
-    <div className="mt-10 grid gap-1 md:grid-cols-2 md:gap-1.5">
+    <div className="mt-12 grid gap-1 md:mt-16 md:grid-cols-2 md:gap-1.5">
       {tiles.map((cat) => (
         <Link
           key={cat.name}
