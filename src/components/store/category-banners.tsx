@@ -18,10 +18,15 @@ export default function CategoryBanners({ categories }: { categories: CategoryBa
         <Link
           key={cat.name}
           href={`/?categoria=${encodeURIComponent(cat.name)}#produtos`}
-          className="showcase-card block min-h-[220px] md:min-h-[320px]"
+          className="product-tile block aspect-[16/10] w-full md:aspect-[2/1]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={productImageUrl(cat.image)} alt={cat.name} loading="lazy" />
+          <img
+            src={productImageUrl(cat.image)}
+            alt={cat.name}
+            loading="lazy"
+            className="product-tile-img"
+          />
           <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-8">
             <p className="font-display text-3xl font-medium text-white md:text-4xl">{cat.name}</p>
             <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/65">

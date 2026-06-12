@@ -27,10 +27,10 @@ export default function ProductShowcaseCard({
   return (
     <Link
       href={`/produto/${product.slug}`}
-      className={`showcase-card group block ${className}`}
+      className={`product-tile group relative block w-full overflow-hidden bg-[#1a1816] aspect-[4/5] ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image} alt={product.name} loading="lazy" />
+      <img src={image} alt={product.name} loading="lazy" className="product-tile-img" />
       <div className="absolute inset-0 z-10 flex flex-col justify-between p-4 md:p-5">
         {product.category ? (
           <span className="w-fit rounded-sm bg-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
