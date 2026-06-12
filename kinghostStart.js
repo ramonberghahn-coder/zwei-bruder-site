@@ -16,7 +16,8 @@ function resolvePort() {
 }
 
 const port = resolvePort();
-const hostname = process.env.HOSTNAME || process.env.HOST || "0.0.0.0";
+// KingHost define HOSTNAME com IP interno; precisa escutar em todas as interfaces.
+const hostname = "0.0.0.0";
 
 process.env.PORT = String(port);
 process.env.NODE_ENV = process.env.NODE_ENV || "production";
