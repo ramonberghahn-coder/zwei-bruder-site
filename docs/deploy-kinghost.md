@@ -57,6 +57,11 @@ Mantenha essa pasta no servidor entre deploys (não apague no FTP).
 1. Script de inicialização: **`kinghostStart.js`** (sem `-` ou `_` no nome — exigência da KingHost)
 2. Habilite acesso web na **raiz do domínio** (proxy 80/443), se disponível
 
+> **Erro 403 na raiz (mas funciona com a porta)?** Veja
+> [`docs/dominio-raiz-403-kinghost.md`](dominio-raiz-403-kinghost.md). Geralmente
+> é falta do proxy reverso 80/443 → porta da aplicação, ou sobras do WordPress
+> no `www/`.
+
 ```bash
 npm install
 npm run build

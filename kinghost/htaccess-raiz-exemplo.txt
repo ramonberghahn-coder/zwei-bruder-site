@@ -1,0 +1,19 @@
+# Proxy reverso da raiz do domínio (portas 80/443) para a aplicação Node na KingHost.
+#
+# COMO USAR
+# 1. Descubra a PORTA ALTA da aplicação no Painel KingHost > ícone Node.JS
+#    (fica entre 21000 e 22000, ex.: 21127). Também aparece em ~/.bash_node
+#    como a variável $PORT_kinghostStart.
+# 2. Copie este conteúdo para um arquivo chamado .htaccess na RAIZ do site
+#    (document root, normalmente a pasta www/).
+# 3. Troque 21127 pela porta real da sua aplicação.
+# 4. Garanta que a pasta www/ NÃO tenha sobras do WordPress (index.php, wp-*,
+#    e .htaccess antigo). Deixe apenas este .htaccess.
+#
+# OBS: "DirectoryIndex disabled" é essencial. Sem ele, o Apache transforma o
+# acesso à home "/" em "/index.html" e o Next.js responde 404.
+
+DirectoryIndex disabled
+
+RewriteEngine On
+RewriteRule ^(.*)$ http://127.0.0.1:21127/$1 [P,L]

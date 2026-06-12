@@ -170,6 +170,12 @@ Resumo técnico:
 docs/deploy-kinghost.md
 ```
 
+Se o domínio der **erro 403 na raiz** (mas funcionar com a porta), veja:
+
+```txt
+docs/dominio-raiz-403-kinghost.md
+```
+
 ## Migração para WordPress/WooCommerce
 
 Se a ideia for usar a hospedagem WordPress da KingHost em vez do app Next.js,
